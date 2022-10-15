@@ -57,19 +57,29 @@ h6 {
 }
 
 .word_box{
-  min-width: 47px;
-  min-height: 47px;
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+  min-height: 45px;
   padding: 2px 2px;
   border: grey 2.25px solid;
   margin:0 3px 3px 0px;
 }
 
-.word_box span{
+.delete_btn{
+  border: none;
+}
+
+.word_box > span{
   font-size: 16px;
 }
 
-.word_box .word_box-choice{
+.word_box-choice, .word_guess_box-choice{
   cursor: pointer;
+}
+
+.word_box-choice:hover{
+  background: #aeaeae;
 }
 
 .game_btn{

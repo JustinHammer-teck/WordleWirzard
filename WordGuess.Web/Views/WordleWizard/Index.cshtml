@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    char[] alphabetRow1 = { 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P' };
+    char[] alphabetRow2 = { 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L' };
+    char[] alphabetRow3 = { 'Z', 'X', 'C', 'V', 'B', 'N', 'M' };
+
+}
+
+<div id="game_container" class="container card mx-auto">
+    <div class="card-body">
+        <div class="row m-1 my-3">
+            <h5 class="card-title pb-3">Wordle Warlock</h5>
+            <div class="card col-10 w-auto">
+                <div class="card-body">
+                    <h6 class="position-relative game_title">
+                        NEXT WORD TO PLAY
+                        <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
+                    </h6>
+                    <div id="word_cast_wrapper" class="col-7 d-flex flex-row" data-cast-word="">
+                        @{
+                            for (int i = 1; i < 6; i++)
+                            {
+                                <div class="word_cast_box word_box position-relative" data-clickregisted="0">
+                                    <span id="word_cast-@i" class="position-absolute top-50 start-50 translate-middle game_word"></span>
+                                </div>
+                            }
+                        }
+                        <div>
+                            <button id="cast_btn" class="game_btn btn-lg btn-success my-1 p-3">
+                                Cast.
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row m-1">
+            <div class="col-5 p-0 " style="height: auto ;max-height: 355px; display: flex; flex-direction: column">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="position-relative game_title">
+                            THE ELIMINATOR
+                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
+                        </h6>
+                        <a class="btn">hi</a>
+                    </div>
+                </div>
+                <div class="card my-3">
+                    <div class="card-body">
+                        <h6 class="position-relative game_title">
+                            NEXT WORD LIST
+                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
+                        </h6>
+                        <div id="next_word_list">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-7 p-0">
+                <div class="card" style="height: auto ;max-height: 355px;margin-left: 15px ; width: auto;">
+                    <div class="card-body">
+                        <h6 class="position-relative game_title">
+                            WORDLE GUESSES
+                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
+                        </h6>
+                        @{
+                            var globalGuessBoxIndex = 1;
+                            for (var i = 1; i < 7; i++)
+                            {
+                                <div id="word_guess_row_@i" class="d-flex flex-wrap" data-rowtext="">
+                                    @for (var j = 1; j < 6; j++)
+                                    {
+                                        <div id="guess_box_id_@globalGuessBoxIndex" data-clickregisted="0" data-guessboxid="@globalGuessBoxIndex" class="word_box position-relative word_guess_box-choice word_guess_box">
+                                            <span id="guess_box_word_id_@globalGuessBoxIndex" class="position-absolute top-50 start-50 translate-middle game_word"></span>
+                                        </div>
+                                        globalGuessBoxIndex++;
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row m-1 my-3">
+            <div class="card ml-2 col-12">
+                <div class="card-body">
+                    <h6 class="my-2">
+                        <span class="position-relative game_title">
+                            ALPHABET
+                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
+                        </span>
+                    </h6>
+                    <div id="alphabetRow1" class="d-flex flex-row">
+                        @foreach (var c in alphabetRow1)
+                        {
+                            <div id="alphabet_char_@c" class="word_box position-relative word_box-choice" data-char="@c">
+                                <span class="position-absolute top-50 start-50 translate-middle game_word" disabled>@c</span>
+                            </div>
+                        }
+                    </div>
+                    <div id="alphabetRow2" class="d-flex flex-row">
+                        @foreach (var c in alphabetRow2)
+                        {
+                            <div id="alphabet_char_@c" class="word_box position-relative word_box-choice" data-char="@c">
+                                <span class="position-absolute top-50 start-50 translate-middle game_word" disabled>@c</span>
+                            </div>
+                        }
+                    </div>
+                    <div id="alphabetRow3" class="d-flex flex-row">
+                        @foreach (var c in alphabetRow3)
+                        {
+                            <div id="alphabet_char_@c" class="word_box position-relative word_box-choice" data-char="@c">
+                                <span class="position-absolute top-50 start-50 translate-middle game_word" disabled>@c</span>
+                            </div>
+                        }
+                        <button class="btn word_box delete_btn btn-outline-danger">
+                            x
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
