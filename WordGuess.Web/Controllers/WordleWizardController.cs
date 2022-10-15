@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WordGuess.Web.Models;
+using WordGuess.Web.Services;
 using WordGuess.Web.ViewModels;
 
 namespace WordGuess.Web.Controllers;
@@ -49,9 +50,29 @@ public class WordleWizardController : Controller
         return Ok(new { msg = "Successful" });
     }
 
+
+    public IActionResult GetStartWords()
+    {
+        return Ok();
+    }
+    
+    public IActionResult WordValidation(string word)
+    {
+        var validation = new ValidationService();
+
+        var validationResult = validation.ValidationWord(word);
+        
+        return Json(new ValidationModel()
+        {
+            State = true,
+            Message = "Success"
+        });
+    }
+    
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
+

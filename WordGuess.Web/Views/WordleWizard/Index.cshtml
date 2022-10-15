@@ -17,13 +17,11 @@
                         <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                     </h6>
                     <div id="word_cast_wrapper" class="col-7 d-flex flex-row" data-cast-word="">
-                        @{
-                            for (int i = 1; i < 6; i++)
-                            {
-                                <div class="word_cast_box word_box position-relative" data-clickregisted="0">
-                                    <span id="word_cast-@i" class="position-absolute top-50 start-50 translate-middle game_word"></span>
-                                </div>
-                            }
+                        @for (int i = 1; i < 6; i++)
+                        {
+                            <div id="word_cast_box_id_@i" class="word_cast_box word_box position-relative word_cast_box-choice" data-char="" data-clickregisted="0">
+                                <span id="word_cast-@i" class="word_cast position-absolute top-50 start-50 translate-middle game_word"></span>
+                            </div>
                         }
                         <div>
                             <button id="cast_btn" class="game_btn btn-lg btn-success my-1 p-3">
@@ -43,7 +41,6 @@
                             THE ELIMINATOR
                             <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                         </h6>
-                        <a class="btn">hi</a>
                     </div>
                 </div>
                 <div class="card my-3">
@@ -66,16 +63,17 @@
                             <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                         </h6>
                         @{
-                            var globalGuessBoxIndex = 1;
                             for (var i = 1; i < 7; i++)
                             {
                                 <div id="word_guess_row_@i" class="d-flex flex-wrap" data-rowtext="">
                                     @for (var j = 1; j < 6; j++)
                                     {
-                                        <div id="guess_box_id_@globalGuessBoxIndex" data-clickregisted="0" data-guessboxid="@globalGuessBoxIndex" class="word_box position-relative word_guess_box-choice word_guess_box">
-                                            <span id="guess_box_word_id_@globalGuessBoxIndex" class="position-absolute top-50 start-50 translate-middle game_word"></span>
+                                        string guessWordIdName = "guess_word_" + j + "_row_" + i;
+                                        string guessBoxIdName = "guess_box_id_" + j + "_row_" + i;
+                                        
+                                        <div id="@guessBoxIdName" class="word_box position-relative word_guess_box">
+                                            <span id="@guessWordIdName" class="position-absolute top-50 start-50 translate-middle game_word"></span>
                                         </div>
-                                        globalGuessBoxIndex++;
                                     }
                                 </div>
                             }
@@ -84,7 +82,6 @@
                 </div>
             </div>
         </div>
-
         <div class="row m-1 my-3">
             <div class="card ml-2 col-12">
                 <div class="card-body">
@@ -117,9 +114,6 @@
                                 <span class="position-absolute top-50 start-50 translate-middle game_word" disabled>@c</span>
                             </div>
                         }
-                        <button class="btn word_box delete_btn btn-outline-danger">
-                            x
-                        </button>
                     </div>
                 </div>
             </div>
