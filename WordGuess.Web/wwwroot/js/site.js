@@ -1,32 +1,148 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿var baseURl = "https://localhost:7231/WordleWizard";
 
-// Write your JavaScript code.
 var guessWordBoxIndex = 1;
 
 var wordCast = [
-    {"id" : 1 , "char" : '' , "status" : 0},
-    {"id" : 2 , "char" : '' , "status" : 0},
-    {"id" : 3 , "char" : '' , "status" : 0},
-    {"id" : 4 , "char" : '' , "status" : 0},
-    {"id" : 5 , "char" : '' , "status" : 0},
+    {"id": 1, "char": '', "status": 0},
+    {"id": 2, "char": '', "status": 0},
+    {"id": 3, "char": '', "status": 0},
+    {"id": 4, "char": '', "status": 0},
+    {"id": 5, "char": '', "status": 0},
 ];
 
 var wordGuessRowState = [
-    {"row" : 1, "state" : true},
-    {"row" : 2, "state" : false},
-    {"row" : 3, "state" : false},
-    {"row" : 4, "state" : false},
-    {"row" : 5, "state" : false},
-    {"row" : 6, "state" : false},
+    {"row": 1, "state": true},
+    {"row": 2, "state": false},
+    {"row": 3, "state": false},
+    {"row": 4, "state": false},
+    {"row": 5, "state": false},
+    {"row": 6, "state": false},
 ];
+
+var WordGuessStage = [
+    {
+        "row": 1,
+        "word": [
+            {"index": 1, "letter": "", "state": 0},
+            {"index": 2, "letter": "", "state": 0},
+            {"index": 3, "letter": "", "state": 0},
+            {"index": 4, "letter": "", "state": 0},
+            {"index": 5, "letter": "", "state": 0},
+        ],
+    }, {
+        "row": 2,
+        "word": [
+            {"index": 1, "letter": "", "state": 0},
+            {"index": 2, "letter": "", "state": 0},
+            {"index": 3, "letter": "", "state": 0},
+            {"index": 4, "letter": "", "state": 0},
+            {"index": 5, "letter": "", "state": 0},
+        ],
+    }, {
+        "row": 3,
+        "word": [
+            {"index": 1, "letter": "", "state": 0},
+            {"index": 2, "letter": "", "state": 0},
+            {"index": 3, "letter": "", "state": 0},
+            {"index": 4, "letter": "", "state": 0},
+            {"index": 5, "letter": "", "state": 0},
+        ],
+    }, {
+        "row": 4,
+        "word": [
+            {"index": 1, "letter": "", "state": 0},
+            {"index": 2, "letter": "", "state": 0},
+            {"index": 3, "letter": "", "state": 0},
+            {"index": 4, "letter": "", "state": 0},
+            {"index": 5, "letter": "", "state": 0},
+        ],
+    }, {
+        "row": 5,
+        "word": [
+            {"index": 1, "letter": "", "state": 0},
+            {"index": 2, "letter": "", "state": 0},
+            {"index": 3, "letter": "", "state": 0},
+            {"index": 4, "letter": "", "state": 0},
+            {"index": 5, "letter": "", "state": 0},
+        ],
+    }, {
+        "row": 6,
+        "word": [
+            {"index": 1, "letter": "", "state": 0},
+            {"index": 2, "letter": "", "state": 0},
+            {"index": 3, "letter": "", "state": 0},
+            {"index": 4, "letter": "", "state": 0},
+            {"index": 5, "letter": "", "state": 0},
+        ],
+    }];
+
+
+function Init() {
+    GetStartWord();
+}
+
+Init();
+
+function GetStartWord() {
+    var $wordList = $("#next_word_list");
+    $.ajax({
+        type: 'GET',
+        url: baseURl + "/GetStartWords",
+        dataType: 'json',
+        success: function (data) {
+            $.each(data, (key, value) => {
+                $wordList.append("<span class=\"word_list_item\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
+            });
+        },
+        error: function (ex) {
+            var r = jQuery.parseJSON(ex.responseText);
+            alert("Message: " + r.Message);
+            alert("StackTrace: " + r.StackTrace);
+            alert("ExceptionType: " + r.ExceptionType);
+        }
+    });
+}
+
+$("#clear-selection").find('option').click(function () {
+    var rowUpdate = 1;
+    var index = 1;
+    if ($(this).val() == 1) {
+        if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
+            $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
+            $.each($("#word_guess_row_" + rowUpdate).children(), function () {
+                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "white");
+                $("#guess_word_" + index + "_row_" + rowUpdate).text("");
+                wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == rowUpdate ? true : false;
+                index++;
+            });
+        }
+        console.log(wordGuessRowState);
+    } else if ($(this).val() == 2) {
+        $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
+        $.each($("#word_guess_row_" + rowUpdate).children(), function () {
+            $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "white");
+            $("#guess_word_" + index + "_row_" + rowUpdate).text("");
+            wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
+            rowUpdate++;
+            index++;
+        });
+    }
+});
+
+function PopulateCastWord(word) {
+    var $wordcast = $("#word_cast-" + guessWordBoxIndex);
+
+    $("#word_cast_wrapper").attr("data-cast-word", word);
+
+    UpdateWordCastWrapper(word, $wordcast);
+}
 
 $(".word_box-choice").click(function () {
     isDisabled = $(this).attr("disabled");
     if (!isDisabled) {
         var $wordcast = $("#word_cast-" + guessWordBoxIndex);
         var wordcast = $("#word_cast_wrapper").attr("data-cast-word");
-        
+
         wordcast = guessWordBoxIndex < 6 ? wordcast.concat($(this).data("char")) : wordcast;
         UpdateWordCastWrapper(wordcast, $wordcast);
 
@@ -35,28 +151,37 @@ $(".word_box-choice").click(function () {
     }
 });
 
-$(".word_cast_box").click(function () {
-    var clickRegisted = parseInt($(this).attr("data-clickregisted"));
-    clickRegisted = clickRegisted < 4 ?  clickRegisted + 1 : 0;
-    if($(this).attr("data-char")){
-        UpdateContextBoxColor(clickRegisted, $(this));
-    }
-    $(this).attr("data-clickregisted", clickRegisted.toString());
-});
-
-function UpdateWordCastWrapper(wordcast, $ctx){
+function UpdateWordCastWrapper(wordcast, $ctx) {
     var index = 1;
     var characterArray = Array.from(wordcast.toUpperCase());
 
     characterArray.forEach(char => {
-        $ctx.text(char);
+        $("#word_cast-" + index).text(char);
         $("#word_cast_box_id_" + index).attr("data-char", char);
         index++;
     });
 }
 
-function WordValidation(word){
-    return true;
+$(".word_cast_box").click(function () {
+    var clickRegisted = parseInt($(this).attr("data-clickregisted"));
+    clickRegisted = clickRegisted < 4 ? clickRegisted + 1 : 0;
+    if ($(this).attr("data-char")) {
+        UpdateContextBoxColor(clickRegisted, $(this));
+        $(this).attr("data-clickregisted", clickRegisted.toString());
+    }
+});
+
+function WordValidation(callback, word) {
+    $.ajax({
+        type: 'POST',
+        url: baseURl + "/WordValidation",
+        dataType: 'json',
+        data: {"word": word},
+        async: false,
+        success: callback,
+        error: function (ex) {
+        }
+    });
 }
 
 function IsWordHasLengthOfFive(wordcast) {
@@ -65,22 +190,29 @@ function IsWordHasLengthOfFive(wordcast) {
 
 $("#cast_btn").click(function () {
     var castingWord = $("#word_cast_wrapper").attr("data-cast-word");
-    if (IsWordHasLengthOfFive(castingWord) && WordValidation(castingWord)) {
+    var validationResult;
+
+    WordValidation((data) => {
+        validationResult = data.state;
+    }, castingWord);
+
+    if (IsWordHasLengthOfFive(castingWord) && validationResult) {
         CastingNextWord(castingWord);
-        ClearState();
     }
+    ClearWordCastState();
 });
 
-function ClearState(){
+function ClearWordCastState() {
     $(".word_cast").text("");
-    $(".word_cast_box").attr("data-clickregisted" , 0);
-    UpdateContextBoxColor(0 , $(".word_cast_box"));
+    $(".word_cast_box").attr("data-clickregisted", 0);
+    $(".word_cast_box").attr("data-char", '');
+    UpdateContextBoxColor(0, $(".word_cast_box"));
     $("#word_cast_wrapper").attr("data-cast-word", "");
     guessWordBoxIndex = 1;
 }
 
-function CheckForDuplication(){
-    
+function CheckForDuplication() {
+
 }
 
 function CastingNextWord(castingWord) {
@@ -88,9 +220,9 @@ function CastingNextWord(castingWord) {
     var row = 1;
     var rowIndex = 0;
     var characterArray = Array.from(castingWord.toUpperCase());
-    
-    while (wordGuessRowState[rowIndex].state == false){
-        if( row < 6 && rowIndex < 5){
+
+    while (wordGuessRowState[rowIndex].state == false) {
+        if (row < 6 && rowIndex < 5) {
             row = row + 1;
             rowIndex = rowIndex + 1;
         }
@@ -105,6 +237,20 @@ function CastingNextWord(castingWord) {
     });
     wordGuessRowState[rowIndex].state = false;
     wordGuessRowState[rowIndex + 1].state = true;
+}
+
+function ProcessWord(guessWordRow) {
+    $.ajax({
+        type: 'POST',
+        url: baseURl + "/WordValidation",
+        dataType: 'json',
+        data: {"word": word},
+        async: false,
+        success: function (data) {
+        },
+        error: function (ex) {
+        }
+    });
 }
 
 function UpdateContextBoxColor(status, $ctx) {

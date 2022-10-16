@@ -9,7 +9,7 @@
 <div id="game_container" class="container card mx-auto">
     <div class="card-body">
         <div class="row m-1 my-3">
-            <h5 class="card-title pb-3">Wordle Warlock</h5>
+            <h5 class="card-title pb-3">Wordle Whiz</h5>
             <div class="card col-10 w-auto">
                 <div class="card-body">
                     <h6 class="position-relative game_title">
@@ -32,13 +32,12 @@
                 </div>
             </div>
         </div>
-
         <div class="row m-1">
             <div class="col-5 p-0 " style="height: auto ;max-height: 355px; display: flex; flex-direction: column">
                 <div class="card">
                     <div class="card-body">
                         <h6 class="position-relative game_title">
-                            THE ELIMINATOR
+                            MAGIC WAND
                             <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                         </h6>
                     </div>
@@ -46,11 +45,10 @@
                 <div class="card my-3">
                     <div class="card-body">
                         <h6 class="position-relative game_title">
-                            NEXT WORD LIST
+                            MAGIC WORD LIST
                             <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                         </h6>
-                        <div id="next_word_list">
-
+                        <div id="next_word_list" class="word_list_container">
                         </div>
                     </div>
                 </div>
@@ -58,19 +56,26 @@
             <div class="col-7 p-0">
                 <div class="card" style="height: auto ;max-height: 355px;margin-left: 15px ; width: auto;">
                     <div class="card-body">
-                        <h6 class="position-relative game_title">
-                            WORDLE GUESSES
-                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
-                        </h6>
+                        <div class="d-flex flex-row justify-content-between">
+                            <h6 class="position-relative game_title">
+                                WORDLE GUESSES
+                                <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
+                            </h6>
+                            <select name="" id="clear-selection">
+                                <option value="" disabled selected hidden>CLEAR ROW</option>
+                                <option value="1">CLEAR FIRST ROW</option>
+                                <option value="2">CLEAR ALL</option>
+                            </select>
+                        </div>
                         @{
                             for (var i = 1; i < 7; i++)
                             {
-                                <div id="word_guess_row_@i" class="d-flex flex-wrap" data-rowtext="">
+                                <div id="word_guess_row_@i" class="d-flex flex-wrap justify-content-around" data-rowtext="">
                                     @for (var j = 1; j < 6; j++)
                                     {
                                         string guessWordIdName = "guess_word_" + j + "_row_" + i;
                                         string guessBoxIdName = "guess_box_id_" + j + "_row_" + i;
-                                        
+
                                         <div id="@guessBoxIdName" class="word_box position-relative word_guess_box">
                                             <span id="@guessWordIdName" class="position-absolute top-50 start-50 translate-middle game_word"></span>
                                         </div>
@@ -99,7 +104,7 @@
                             </div>
                         }
                     </div>
-                    <div id="alphabetRow2" class="d-flex flex-row">
+                    <div id="alphabetRow2" class="d-flex flex-row justify-content-center">
                         @foreach (var c in alphabetRow2)
                         {
                             <div id="alphabet_char_@c" class="word_box position-relative word_box-choice" data-char="@c">
@@ -107,10 +112,10 @@
                             </div>
                         }
                     </div>
-                    <div id="alphabetRow3" class="d-flex flex-row">
+                    <div id="alphabetRow3" class="d-flex flex-row justify-content-center">
                         @foreach (var c in alphabetRow3)
                         {
-                            <div id="alphabet_char_@c" class="word_box position-relative word_box-choice" data-char="@c">
+                            <div id="alphabet_char_@c" class="word_box position-relative word_box-choice " data-char="@c">
                                 <span class="position-absolute top-50 start-50 translate-middle game_word" disabled>@c</span>
                             </div>
                         }
