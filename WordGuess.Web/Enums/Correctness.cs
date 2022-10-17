@@ -1,6 +1,6 @@
 namespace WordGuess.Web.Enums;
 
-public enum GuessLetterStatus
+public enum Correctness
 {
     None,
     WrongPlacement,

@@ -6,10 +6,10 @@
 
 }
 
-<div id="game_container" class="container card mx-auto">
+<div id="game_container" class="container card mt-5 mx-auto" >
     <div class="card-body">
         <div class="row m-1 my-3">
-            <h5 class="card-title pb-3">Wordle Whiz</h5>
+            <h5 class="card-title text-warning pb-3">Wordle Whiz</h5>
             <div class="card col-10 w-auto">
                 <div class="card-body">
                     <h6 class="position-relative game_title">
@@ -24,8 +24,8 @@
                             </div>
                         }
                         <div>
-                            <button id="cast_btn" class="game_btn btn-lg btn-success my-1 p-3">
-                                Cast.
+                            <button id="cast_btn" class="game_btn btn-lg btn-success">
+                                Cast
                             </button>
                         </div>
                     </div>
@@ -61,16 +61,24 @@
                                 WORDLE GUESSES
                                 <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                             </h6>
-                            <select name="" id="clear-selection">
-                                <option value="" disabled selected hidden>CLEAR ROW</option>
-                                <option value="1">CLEAR FIRST ROW</option>
-                                <option value="2">CLEAR ALL</option>
-                            </select>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle dropdown-btn text-warning" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                    CLEAR ROW
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                    <li>
+                                        <a class="dropdown-item" data-value="1" href="#">CLEAR FIRST ROW</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" data-value="2" href="#">CLEAR ALL</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                         @{
                             for (var i = 1; i < 7; i++)
                             {
-                                <div id="word_guess_row_@i" class="d-flex flex-wrap justify-content-around" data-rowtext="">
+                                <div id="word_guess_row_@i" class="word_guess_row d-flex flex-wrap justify-content-center" data-rowtext="">
                                     @for (var j = 1; j < 6; j++)
                                     {
                                         string guessWordIdName = "guess_word_" + j + "_row_" + i;
@@ -96,7 +104,7 @@
                             <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                         </span>
                     </h6>
-                    <div id="alphabetRow1" class="d-flex flex-row">
+                    <div id="alphabetRow1" class="d-flex flex-row justify-content-center">
                         @foreach (var c in alphabetRow1)
                         {
                             <div id="alphabet_char_@c" class="word_box position-relative word_box-choice" data-char="@c">

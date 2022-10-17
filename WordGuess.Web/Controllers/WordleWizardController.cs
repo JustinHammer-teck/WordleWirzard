@@ -22,41 +22,28 @@ public class WordleWizardController : Controller
 
     public IActionResult Index()
     {
-        var GuessWordRows = new List<GuessWordRow>();
+        // var wordleSolver = new WordleSolver(_hostingEnvironment);
+        //
+        // var wordList = wordleSolver.GetWordList();
+        //
+        //
+        // foreach (var answer in wordList)
+        // {
+        //     wordleSolver.Handler(answer);
+        // }
 
-        for (int i = 0; i < 6; i++)
-        {
-            GuessWordRows.Add(new GuessWordRow());
-        }
-        
         return View();
     }
     
-    public JsonResult GetNextWord()
+    [HttpPost]
+    public IActionResult ProcessGuessWord(Guess guessWord)
     {
-        var nextGuessWord = new GuessWordViewModel();
-        
-        return Json(nextGuessWord);
-    }
-    
-    public IActionResult UpdateGuessWord(GuessWordViewModel guessWordViewModel)
-    {
-        
-        return Ok(new { msg = "Successful" });
-    }
-    
-    public IActionResult GetWordList(string word)
-    {
-        var wordleSolver = new WordleSolver(_hostingEnvironment);
-        var solverResult = wordleSolver.Handler(word);
-        return Json( solverResult );
-    }
-    
-    public IActionResult UpdateGuessWordRow(IEnumerable<GuessWordRowViewModel> guessWordRowViewModels)
-    {
-        return Ok(new { msg = "Successful" });
-    }
+        // var wordleSolver = new WordleSolver(_hostingEnvironment);
+        // var solverResult = wordleSolver.Handler();
 
+        return Ok();
+    }
+    
     [HttpGet]
     public IActionResult GetStartWords()
     {

@@ -1,6 +1,12 @@
-﻿var baseURl = "https://localhost:7231/WordleWizard";
+﻿
+var baseURl = "https://localhost:7231/WordleWizard";
 
 var guessWordBoxIndex = 1;
+
+var guessWord = {
+    "Word" : "CRANE",
+    "Status" : [1,2,3,1,2]
+}
 
 var wordCast = [
     {"id": 1, "char": '', "status": 0},
@@ -79,19 +85,21 @@ var WordGuessStage = [
 
 function Init() {
     GetStartWord();
+    KeyBoardRegister();
 }
 
 Init();
 
 function GetStartWord() {
     var $wordList = $("#next_word_list");
+    $wordList.empty();
     $.ajax({
         type: 'GET',
         url: baseURl + "/GetStartWords",
         dataType: 'json',
         success: function (data) {
             $.each(data, (key, value) => {
-                $wordList.append("<span class=\"word_list_item\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
+                $wordList.append("<span class=\"word_list_item\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
             });
         },
         error: function (ex) {
@@ -103,30 +111,36 @@ function GetStartWord() {
     });
 }
 
-$("#clear-selection").find('option').click(function () {
+$(".dropdown-item").click(function () {
     var rowUpdate = 1;
     var index = 1;
-    if ($(this).val() == 1) {
+    var value = $(this).attr("data-value");
+    
+    if (value == 1) {
         if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
             $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
             $.each($("#word_guess_row_" + rowUpdate).children(), function () {
-                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "white");
+                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "rgba(0, 0, 0, 0)");
                 $("#guess_word_" + index + "_row_" + rowUpdate).text("");
                 wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == rowUpdate ? true : false;
                 index++;
             });
         }
-        console.log(wordGuessRowState);
-    } else if ($(this).val() == 2) {
-        $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
-        $.each($("#word_guess_row_" + rowUpdate).children(), function () {
-            $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "white");
-            $("#guess_word_" + index + "_row_" + rowUpdate).text("");
-            wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
+    } else if (value == 2) {
+        $.each($(".word_guess_row"), function () {
+            $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
+            $.each($("#word_guess_row_" + rowUpdate).children(), function () {
+                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "rgba(0, 0, 0, 0)");
+                $("#guess_word_" + index + "_row_" + rowUpdate).text("");
+                wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
+                index++;
+            });
             rowUpdate++;
-            index++;
-        });
+            index = 1;
+        })
     }
+    GetStartWord();
+
 });
 
 function PopulateCastWord(word) {
@@ -140,16 +154,20 @@ function PopulateCastWord(word) {
 $(".word_box-choice").click(function () {
     isDisabled = $(this).attr("disabled");
     if (!isDisabled) {
-        var $wordcast = $("#word_cast-" + guessWordBoxIndex);
-        var wordcast = $("#word_cast_wrapper").attr("data-cast-word");
-
-        wordcast = guessWordBoxIndex < 6 ? wordcast.concat($(this).data("char")) : wordcast;
-        UpdateWordCastWrapper(wordcast, $wordcast);
-
-        $("#word_cast_wrapper").attr("data-cast-word", wordcast);
-        guessWordBoxIndex = guessWordBoxIndex < 6 ? guessWordBoxIndex + 1 : 6;
+        WordInput($(this).data("char"));
     }
 });
+
+function WordInput(letter){
+    var $wordcast = $("#word_cast-" + guessWordBoxIndex);
+    var wordcast = $("#word_cast_wrapper").attr("data-cast-word");
+
+    wordcast = guessWordBoxIndex < 6 ? wordcast.concat(letter) : wordcast;
+    UpdateWordCastWrapper(wordcast, $wordcast);
+
+    $("#word_cast_wrapper").attr("data-cast-word", wordcast);
+    guessWordBoxIndex = guessWordBoxIndex < 6 ? guessWordBoxIndex + 1 : 6;
+}
 
 function UpdateWordCastWrapper(wordcast, $ctx) {
     var index = 1;
@@ -191,7 +209,9 @@ function IsWordHasLengthOfFive(wordcast) {
 $("#cast_btn").click(function () {
     var castingWord = $("#word_cast_wrapper").attr("data-cast-word");
     var validationResult;
-
+    
+    $(".word_list_item").filter(":contains("+ castingWord +")").remove();
+    
     WordValidation((data) => {
         validationResult = data.state;
     }, castingWord);
@@ -202,6 +222,19 @@ $("#cast_btn").click(function () {
     ClearWordCastState();
 });
 
+function ProcessGuessWord(callback, guessWord){
+    $.ajax({
+        type: 'POST',
+        url: baseURl + "/ProcessGuessWord",
+        dataType: 'json',
+        data: {"guessWord": guessWord},
+        async: false,
+        success: callback,
+        error: function (ex) {
+        }
+    });
+}
+
 function ClearWordCastState() {
     $(".word_cast").text("");
     $(".word_cast_box").attr("data-clickregisted", 0);
@@ -209,10 +242,6 @@ function ClearWordCastState() {
     UpdateContextBoxColor(0, $(".word_cast_box"));
     $("#word_cast_wrapper").attr("data-cast-word", "");
     guessWordBoxIndex = 1;
-}
-
-function CheckForDuplication() {
-
 }
 
 function CastingNextWord(castingWord) {
@@ -235,37 +264,28 @@ function CastingNextWord(castingWord) {
         UpdateAlphabet(boxStatus, char);
         index++;
     });
+    
+    ProcessGuessWord((data) => {
+        console.log(data);
+    }, guessWord);
+    
     wordGuessRowState[rowIndex].state = false;
     wordGuessRowState[rowIndex + 1].state = true;
-}
-
-function ProcessWord(guessWordRow) {
-    $.ajax({
-        type: 'POST',
-        url: baseURl + "/WordValidation",
-        dataType: 'json',
-        data: {"word": word},
-        async: false,
-        success: function (data) {
-        },
-        error: function (ex) {
-        }
-    });
 }
 
 function UpdateContextBoxColor(status, $ctx) {
     switch (status) {
         case 1:
-            $ctx.css("background-color", "orange");
+            $ctx.css("background-color", "#ffc107");
             break;
         case 2:
-            $ctx.css("background-color", "green");
+            $ctx.css("background-color", "#198754");
             break;
         case 3:
-            $ctx.css("background-color", "blue");
+            $ctx.css("background-color", "#0d6efd");
             break
         default:
-            $ctx.css("background-color", "white");
+            $ctx.css("background-color", "rgba(0, 0, 0, 0)");
     }
 }
 
@@ -273,18 +293,28 @@ function UpdateAlphabet(status, char) {
     var $alphabet = $("#alphabet_char_" + char);
     switch (status) {
         case 1:
-            $alphabet.css("background-color", "orange");
+            $alphabet.css("background-color", "#ffc107");
             break;
         case 2:
-            $alphabet.css("background-color", "green");
+            $alphabet.css("background-color", "#198754");
             break;
         case 3:
             $alphabet.attr("disabled", true);
-            $alphabet.css("background-color", "blue");
+            $alphabet.css("background-color", "#0d6efd");
             break
         default:
-            $alphabet.css("background-color", "white");
+            $alphabet.css("background-color", "rgba(0, 0, 0, 0)");
     }
+}
+
+
+function KeyBoardRegister() {
+    $("body").keypress(function (e) {
+        if ($("#word_cast_wrapper").attr("data-cast-word").length != 5) {
+            var char = KeyCodeHandler(e.keyCode);
+            console.log(char);
+        }
+    });
 }
 
     

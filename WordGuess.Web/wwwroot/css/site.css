@@ -1,3 +1,8 @@
+@font-face {
+  font-family: PressStart2P;
+  src: url(../fonts/PressStart2P-Regular.ttf);
+}
+
 html {
   font-size: 14px;
 }
@@ -8,6 +13,10 @@ html {
   }
 }
 
+h5, h6, span{
+  color: #f3f3f3;
+  font-family: PressStart2P, sans-serif;
+}
 .card-body{
   padding: 1rem 0.5rem;
 }
@@ -18,9 +27,10 @@ html {
 }
 
 body {
-  font-family: "Press Start 2P", sans-serif;
+  font-family: PressStart2P, sans-serif;
   font-size: 10px;
   margin-bottom: 60px;
+  background-image: linear-gradient(#000c2f, #021657, rgba(9, 9, 9, 0.96));
 }
 
 h6 {
@@ -29,6 +39,7 @@ h6 {
 }
 
 #game_container{
+  background-image: linear-gradient(#01154b, #100f0f);
   width: 30%;
   min-width: 500px;
   height: 100%;
@@ -45,8 +56,8 @@ h6 {
 }
 
 .game_word{
-  color: #1c1f23;
-  font-size: 30px;
+  color: #f3f3f3;
+  font-size: 27px;
   font-weight: bold;
 }
 
@@ -56,7 +67,7 @@ h6 {
   min-width: 45px;
   min-height: 45px;
   padding: 2px 2px;
-  border: grey 2.25px solid;
+  border: #d2d2d2 2.25px solid;
   margin:0 3px 3px 0px;
 }
 
@@ -65,7 +76,7 @@ h6 {
 }
 
 .word_box > span{
-  font-size: 20px;
+  font-size: 17px;
 }
 
 .word_box-choice, .word_cast_box-choice{
@@ -85,24 +96,56 @@ h6 {
 }
 
 .word_list_item{
-  color: black;
+  color: #f3f3f3;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 12px;
   padding: 5px;
   flex: 50%;
   cursor: pointer;
 }
 
+.word_list_item:hover{
+  color: #ffc107;
+}
+
 .game_btn{
-  font-family: "Press Start 2P", sans-serif;
-  font-size: 10px;
-  margin: auto;
+  font-family: PressStart2P, sans-serif;
+  font-size: 12px;
+  margin-bottom: 5px;
   min-width: 100px;
   max-height: 45px;
-  vertical-align: auto;
+  padding: 12px 0;
 }
 
 .game_title{
-  font-size: 10px;
+  color: #f3f3f3;
+  font-family: PressStart2P, sans-serif;
+  font-size: 8px;
   margin-top: .2rem;
+}
+
+.dropdown-btn{
+  font-size: 8px;
+  text-decoration: none;
+}
+
+.dropdown-menu{
+  font-size: 9px;
+}
+.card{
+  padding: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: #fff;
+  background-clip: border-box;
+  border: .25px hidden rgba(0,0,0, 0.09);
+  border-radius: .25rem;
+}
+.card-body{
+  background-image: linear-gradient(#000c2f, #021657, rgba(9, 9, 9, 0.96));
+  border: .25px hidden rgba(0,0,0, 0);
+  border-radius: .25rem;
 }
