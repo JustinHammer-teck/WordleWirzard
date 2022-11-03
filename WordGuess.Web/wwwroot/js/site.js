@@ -1,21 +1,5 @@
-﻿
-var baseURl = "https://localhost:7231/WordleWizard";
-
+﻿var baseURl = "https://localhost:7231/WordleWizard";
 var guessWordBoxIndex = 1;
-
-var guessWord = {
-    "Word" : "CRANE",
-    "Status" : [1,2,3,1,2]
-}
-
-var wordCast = [
-    {"id": 1, "char": '', "status": 0},
-    {"id": 2, "char": '', "status": 0},
-    {"id": 3, "char": '', "status": 0},
-    {"id": 4, "char": '', "status": 0},
-    {"id": 5, "char": '', "status": 0},
-];
-
 var wordGuessRowState = [
     {"row": 1, "state": true},
     {"row": 2, "state": false},
@@ -25,62 +9,12 @@ var wordGuessRowState = [
     {"row": 6, "state": false},
 ];
 
-var WordGuessStage = [
-    {
-        "row": 1,
-        "word": [
-            {"index": 1, "letter": "", "state": 0},
-            {"index": 2, "letter": "", "state": 0},
-            {"index": 3, "letter": "", "state": 0},
-            {"index": 4, "letter": "", "state": 0},
-            {"index": 5, "letter": "", "state": 0},
-        ],
-    }, {
-        "row": 2,
-        "word": [
-            {"index": 1, "letter": "", "state": 0},
-            {"index": 2, "letter": "", "state": 0},
-            {"index": 3, "letter": "", "state": 0},
-            {"index": 4, "letter": "", "state": 0},
-            {"index": 5, "letter": "", "state": 0},
-        ],
-    }, {
-        "row": 3,
-        "word": [
-            {"index": 1, "letter": "", "state": 0},
-            {"index": 2, "letter": "", "state": 0},
-            {"index": 3, "letter": "", "state": 0},
-            {"index": 4, "letter": "", "state": 0},
-            {"index": 5, "letter": "", "state": 0},
-        ],
-    }, {
-        "row": 4,
-        "word": [
-            {"index": 1, "letter": "", "state": 0},
-            {"index": 2, "letter": "", "state": 0},
-            {"index": 3, "letter": "", "state": 0},
-            {"index": 4, "letter": "", "state": 0},
-            {"index": 5, "letter": "", "state": 0},
-        ],
-    }, {
-        "row": 5,
-        "word": [
-            {"index": 1, "letter": "", "state": 0},
-            {"index": 2, "letter": "", "state": 0},
-            {"index": 3, "letter": "", "state": 0},
-            {"index": 4, "letter": "", "state": 0},
-            {"index": 5, "letter": "", "state": 0},
-        ],
-    }, {
-        "row": 6,
-        "word": [
-            {"index": 1, "letter": "", "state": 0},
-            {"index": 2, "letter": "", "state": 0},
-            {"index": 3, "letter": "", "state": 0},
-            {"index": 4, "letter": "", "state": 0},
-            {"index": 5, "letter": "", "state": 0},
-        ],
-    }];
+var wordleWord = {
+    PossibleWords: [],
+    GuessWord: "",
+    Correctness: [],
+    Row: 1
+}
 
 
 function Init() {
@@ -98,8 +32,12 @@ function GetStartWord() {
         url: baseURl + "/GetStartWords",
         dataType: 'json',
         success: function (data) {
-            $.each(data, (key, value) => {
-                $wordList.append("<span class=\"word_list_item\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
+            $.each(data.startWords, (key, value) => {
+                if (data.bestWord === value) {
+                    $wordList.append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
+                } else {
+                    $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
+                }
             });
         },
         error: function (ex) {
@@ -115,7 +53,7 @@ $(".dropdown-item").click(function () {
     var rowUpdate = 1;
     var index = 1;
     var value = $(this).attr("data-value");
-    
+
     if (value == 1) {
         if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
             $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
@@ -158,7 +96,7 @@ $(".word_box-choice").click(function () {
     }
 });
 
-function WordInput(letter){
+function WordInput(letter) {
     var $wordcast = $("#word_cast-" + guessWordBoxIndex);
     var wordcast = $("#word_cast_wrapper").attr("data-cast-word");
 
@@ -172,7 +110,6 @@ function WordInput(letter){
 function UpdateWordCastWrapper(wordcast, $ctx) {
     var index = 1;
     var characterArray = Array.from(wordcast.toUpperCase());
-
     characterArray.forEach(char => {
         $("#word_cast-" + index).text(char);
         $("#word_cast_box_id_" + index).attr("data-char", char);
@@ -209,9 +146,9 @@ function IsWordHasLengthOfFive(wordcast) {
 $("#cast_btn").click(function () {
     var castingWord = $("#word_cast_wrapper").attr("data-cast-word");
     var validationResult;
-    
-    $(".word_list_item").filter(":contains("+ castingWord +")").remove();
-    
+
+    $(".word_list_item").filter(":contains(" + castingWord + ")").remove();
+
     WordValidation((data) => {
         validationResult = data.state;
     }, castingWord);
@@ -222,18 +159,6 @@ $("#cast_btn").click(function () {
     ClearWordCastState();
 });
 
-function ProcessGuessWord(callback, guessWord){
-    $.ajax({
-        type: 'POST',
-        url: baseURl + "/ProcessGuessWord",
-        dataType: 'json',
-        data: {"guessWord": guessWord},
-        async: false,
-        success: callback,
-        error: function (ex) {
-        }
-    });
-}
 
 function ClearWordCastState() {
     $(".word_cast").text("");
@@ -257,20 +182,67 @@ function CastingNextWord(castingWord) {
         }
     }
     $("#word_guess_row_" + row).attr("data-rowtext", castingWord);
+
+    var correctness = [];
+
     characterArray.forEach(char => {
         var boxStatus = parseInt($("#word_cast_box_id_" + index).attr("data-clickregisted"));
+        switch (boxStatus) {
+            case 1:
+                correctness.push('Y');
+                break;
+            case 2:
+                correctness.push('G');
+                break;
+            case 3:
+                correctness.push('B');
+                break
+            default:
+                correctness.push('B');
+        }
+
         $("#guess_word_" + index + "_row_" + row).text(char);
         UpdateContextBoxColor(boxStatus, $("#guess_box_id_" + index + "_row_" + row));
         UpdateAlphabet(boxStatus, char);
         index++;
     });
-    
+
+    wordleWord.GuessWord = $("#word_cast_wrapper").attr("data-cast-word");
+    wordleWord.Correctness = correctness;
+
+
+    var $wordList = $("#next_word_list");
+    $wordList.empty();
     ProcessGuessWord((data) => {
         console.log(data);
-    }, guessWord);
-    
+        $.each(data.guessWords, (key, value) => {
+            console.log(value);
+            if (data.bestWord === value) {
+                $wordList.append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
+            } else {
+                $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
+            }
+        });
+
+        wordleWord.PossibleWords = data.guessWords;
+    });
+
     wordGuessRowState[rowIndex].state = false;
     wordGuessRowState[rowIndex + 1].state = true;
+}
+
+function ProcessGuessWord(callback) {
+    $.ajax({
+        type: 'POST',
+        url: baseURl + "/ProcessGuessWord",
+        dataType: 'JSON',
+        contentType: 'application/x-www-form-urlencoded',
+        data: {wordleWord},
+        async: false,
+        success: callback,
+        error: function (ex) {
+        }
+    });
 }
 
 function UpdateContextBoxColor(status, $ctx) {
