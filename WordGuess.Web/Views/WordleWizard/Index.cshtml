@@ -5,6 +5,20 @@
     char[] alphabetRow3 = { 'Z', 'X', 'C', 'V', 'B', 'N', 'M' };
 
 }
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h6 class="modal-title" id="exampleModalLabel">Modal title</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                CONGRATULATION YOU SOLVE THE WORDLE GAME
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="game_container" class="container card mt-5 mx-auto" >
     <div class="card-body">
@@ -16,7 +30,7 @@
                         NEXT WORD TO PLAY
                         <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
                     </h6>
-                    <div id="word_cast_wrapper" class="col-7 d-flex flex-row" data-cast-word="">
+                    <div id="word_cast_wrapper" class="col-7 d-flex flex-row" data-cast-word="" data-correctness="">
                         @for (int i = 1; i < 6; i++)
                         {
                             <div id="word_cast_box_id_@i" class="word_cast_box word_box position-relative word_cast_box-choice" data-char="" data-clickregisted="0">

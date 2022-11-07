@@ -16,10 +16,16 @@ var wordleWord = {
     Row: 1
 }
 
+var gameModal;
 
 function Init() {
     GetStartWord();
     KeyBoardRegister();
+
+    gameModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+        keyboard: false
+    });
+
 }
 
 Init();
@@ -54,8 +60,13 @@ $(".dropdown-item").click(function () {
     var index = 1;
     var value = $(this).attr("data-value");
 
+
     if (value == 1) {
         if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
+            var text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
+            $.each(Array.from(text), function (index, char) {
+                UpdateAlphabet(0, char);
+            });
             $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
             $.each($("#word_guess_row_" + rowUpdate).children(), function () {
                 $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "rgba(0, 0, 0, 0)");
@@ -66,13 +77,17 @@ $(".dropdown-item").click(function () {
         }
     } else if (value == 2) {
         $.each($(".word_guess_row"), function () {
-            $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
             $.each($("#word_guess_row_" + rowUpdate).children(), function () {
+                var text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
+                $.each(Array.from(text.toUpperCase()), function (index, char) {
+                    UpdateAlphabet(0, char);
+                });
                 $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "rgba(0, 0, 0, 0)");
                 $("#guess_word_" + index + "_row_" + rowUpdate).text("");
                 wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
                 index++;
             });
+            $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
             rowUpdate++;
             index = 1;
         })
@@ -118,11 +133,11 @@ function UpdateWordCastWrapper(wordcast, $ctx) {
 }
 
 $(".word_cast_box").click(function () {
-    var clickRegisted = parseInt($(this).attr("data-clickregisted"));
-    clickRegisted = clickRegisted < 4 ? clickRegisted + 1 : 0;
+    let status = parseInt($(this).attr("data-clickregisted"));
+    status = status < 4 ? status + 1 : 0;
     if ($(this).attr("data-char")) {
-        UpdateContextBoxColor(clickRegisted, $(this));
-        $(this).attr("data-clickregisted", clickRegisted.toString());
+        UpdateContextBoxColor(status, $(this));
+        $(this).attr("data-clickregisted", status.toString());
     }
 });
 
@@ -145,10 +160,19 @@ function IsWordHasLengthOfFive(wordcast) {
 
 $("#cast_btn").click(function () {
     var castingWord = $("#word_cast_wrapper").attr("data-cast-word");
-    var validationResult;
+    var correctness = $("#word_cast_wrapper").attr("data-correctness");
+    console.log("click");
+    console.log(correctness);
+    
+    if (correctness === "GGGGG") {
+        gameModal.toggle();
+        console.log("yeah");
+        return;
+    }
 
     $(".word_list_item").filter(":contains(" + castingWord + ")").remove();
 
+    var validationResult;
     WordValidation((data) => {
         validationResult = data.state;
     }, castingWord);
@@ -214,9 +238,7 @@ function CastingNextWord(castingWord) {
     var $wordList = $("#next_word_list");
     $wordList.empty();
     ProcessGuessWord((data) => {
-        console.log(data);
         $.each(data.guessWords, (key, value) => {
-            console.log(value);
             if (data.bestWord === value) {
                 $wordList.append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
             } else {

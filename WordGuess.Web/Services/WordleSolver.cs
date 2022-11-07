@@ -217,9 +217,6 @@ public class WordleSolver
         double maxScore = 100000000000000000;
         var result = "";
         var score = WordScore(possibleWord, letterFeq);
-        var watch = new System.Diagnostics.Stopwatch();
-
-        watch.Start();
 
         foreach (var word in possibleWord)
         {
@@ -231,8 +228,6 @@ public class WordleSolver
             }
         }
 
-        watch.Stop();
-        Console.WriteLine($"Best Match Run {possibleWord.Length} words for {watch.ElapsedMilliseconds} ms");
         return result;
     }
 

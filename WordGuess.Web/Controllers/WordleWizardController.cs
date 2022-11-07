@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using WordGuess.Web.Models;
 using WordGuess.Web.Services;
