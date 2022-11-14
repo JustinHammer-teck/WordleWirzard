@@ -31,9 +31,13 @@ public class WordleWizardController : Controller
     {
         var correctness = new string(wordleWord.Correctness);
         var wordle = new WordleSolver(_hostingEnvironment);
-        var result = wordle.Handle(correctness, wordleWord.GuessWord.ToLower(), wordleWord.PossibleWords, wordleWord.Row);
-        
-        return Ok(result);
+        var result = wordle.Handle(
+            correctness,
+            wordleWord.GuessWord.ToLower(),
+            wordleWord.PossibleWords,
+            wordleWord.Row,
+            wordleWord.UsedWords);
+        return Ok(new { data = result});
     }
 
     [HttpGet]
@@ -42,7 +46,7 @@ public class WordleWizardController : Controller
         var startwords = System.IO.File.ReadAllText(pathToRoot + "/src/start_word.txt");
         var startwordList = startwords.Split('\n');
         var wordle = new WordleSolver(_hostingEnvironment);
-        
+
         return Json(new WordleStartWords()
         {
             StartWords = startwordList,

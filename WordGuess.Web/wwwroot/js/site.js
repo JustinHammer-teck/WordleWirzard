@@ -13,19 +13,17 @@ var wordleWord = {
     PossibleWords: [],
     GuessWord: "",
     Correctness: [],
-    Row: 1
+    Row: 1,
+    UsedWords: []
 }
 
-var gameModal;
+var gameModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+    keyboard: false
+});
 
 function Init() {
     GetStartWord();
     KeyBoardRegister();
-
-    gameModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
-        keyboard: false
-    });
-
 }
 
 Init();
@@ -160,16 +158,6 @@ function IsWordHasLengthOfFive(wordcast) {
 
 $("#cast_btn").click(function () {
     var castingWord = $("#word_cast_wrapper").attr("data-cast-word");
-    var correctness = $("#word_cast_wrapper").attr("data-correctness");
-    console.log("click");
-    console.log(correctness);
-    
-    if (correctness === "GGGGG") {
-        gameModal.toggle();
-        console.log("yeah");
-        return;
-    }
-
     $(".word_list_item").filter(":contains(" + castingWord + ")").remove();
 
     var validationResult;
@@ -194,6 +182,7 @@ function ClearWordCastState() {
 }
 
 function CastingNextWord(castingWord) {
+    wordleWord.UsedWords.push(castingWord)
     var index = 1;
     var row = 1;
     var rowIndex = 0;
@@ -230,7 +219,11 @@ function CastingNextWord(castingWord) {
         UpdateAlphabet(boxStatus, char);
         index++;
     });
-
+    
+    if(correctness == "GGGGG"){
+        gameModal.toggle();
+    }
+    
     wordleWord.GuessWord = $("#word_cast_wrapper").attr("data-cast-word");
     wordleWord.Correctness = correctness;
 

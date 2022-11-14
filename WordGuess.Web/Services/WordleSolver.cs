@@ -15,12 +15,12 @@ public class WordleSolver
         pathToRoot = Path.Combine(_hostingEnvironment.WebRootPath);
     }
 
-    public WordleWords Handle(string correctness, string guess, string[] possibleWords, int row)
+    public WordleWords Handle(string correctness, string guess, string[] possibleWords, int row, string[] usedWords)
     {
         var result = new WordleWords();
         if (row == 1)
         {
-            possibleWords = File.ReadAllLines(pathToRoot + "/src/word_answer.txt");
+            possibleWords = File.ReadAllLines(pathToRoot + "/src/word_guess.txt");
         }
         else if (possibleWords.Any() && row > 1)
         {
@@ -31,7 +31,7 @@ public class WordleSolver
 
         result.GuessWords = guessWordsRef;
         result.BestWord = BestWord(guessWordsRef, LetterFeq(guessWordsRef));
-        result.EliminationWord = GetEliminationWord(guessWordsRef);
+        // result.EliminationWord = GetEliminationWord(usedWords, guess , correctness);
         return result;
     }
 
@@ -257,8 +257,28 @@ public class WordleSolver
         return letterfeq;
     }
 
-    private string GetEliminationWord(string[] possibleWords)
+    public IEnumerable<string> GetEliminationWord(string[] usedWords, string guess, string result)
     {
-        return "";
+        var allWordList = File.ReadAllLines(pathToRoot + "/src/word_answer.txt");
+        var correctness = result.ToCharArray();
+        var guessletters = guess.ToCharArray();
+    
+        var correctletters = guessletters
+            .Select((value, index) => new { value, index })
+            .Where((value, index)  => correctness[index] == 'G')
+            .Select(args => args.value);
+    
+        var goodletters = guessletters
+            .Select((value, index) => new { value, index })
+            .Where((value, index)  => correctness[index] == 'Y')
+            .Select(args => args.value);
+    
+        //Get Words Where there are no duplication letter in string
+        var possibleWordRef = allWordList
+            .Where(word => !usedWords.Contains(word))
+            .Where(word => !word.Any(correctletters.Contains))
+            .Where(word => !word.Any(goodletters.Contains));
+    
+        return possibleWordRef;
     }
 }
