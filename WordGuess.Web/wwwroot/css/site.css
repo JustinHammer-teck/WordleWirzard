@@ -3,6 +3,11 @@
   src: url(../fonts/PressStart2P-Regular.ttf);
 }
 
+@font-face {
+  font-family: SfProText;
+  src: url(../fonts/SF-Pro-Text-Regular.ttf);
+}
+
 html {
   font-size: 10px;
 }
@@ -13,10 +18,14 @@ html {
   }
 }
 
-h5, h6, span{
-  color: #f3f3f3;
+h6 {
+  font-family: SfProText, sans-serif;
+}
+
+span{
   font-family: PressStart2P, sans-serif;
 }
+
 .card-body{
   padding: 1rem 0.5rem;
 }
@@ -27,10 +36,10 @@ html {
 }
 
 body {
-  font-family: PressStart2P, sans-serif;
+  font-family: SfProText, sans-serif;
   font-size: 10px;
   margin-bottom: 60px;
-  background-image: linear-gradient(#1D5EC080, #020C1B80);
+  background: url('../assets/Rectangle.png'), radial-gradient(118.58% 72.31% at 33.26% 24.47%, #0F3671 13.96%, #020C1B 81.75%);
 }
 
 h6 {
@@ -39,7 +48,6 @@ h6 {
 }
 
 #game_container{
-  background-image: linear-gradient(#01154b, #100f0f);
   width: 30%;
   min-width: 500px;
   height: 100%;
@@ -53,6 +61,11 @@ h6 {
   height: auto ;
   max-height: 202px;
   overflow-y: scroll;
+}
+
+#game_title{
+  font-family: PressStart2P, sans-serif;
+  color: #ffc107;
 }
 
 .game_word{
@@ -76,7 +89,7 @@ h6 {
 }
 
 .word_box > span{
-  font-size: 17px;
+  font-size: 14px;
 }
 
 .word_box-choice, .word_cast_box-choice{
@@ -97,8 +110,8 @@ h6 {
 
 .word_list_item{
   color: #f3f3f3;
-  font-weight: bold;
   font-size: 12px;
+  line-height: 25px;
   padding: 5px;
   flex: 50%;
   cursor: pointer;
@@ -115,13 +128,16 @@ h6 {
   min-width: 100px;
   max-height: 45px;
   padding: 12px 0;
+  background: linear-gradient(180deg, #BB6BD9 0%, #731A95 100%);
+  border-radius: 5px;
 }
 
 .game_title{
   color: #f3f3f3;
-  font-family: PressStart2P, sans-serif;
-  font-size: 8px;
+  font-family: SfProText, sans-serif;
+  font-size: 12px;
   margin-top: .2rem;
+  font-weight: normal;
 }
 
 .dropdown-btn{
@@ -144,9 +160,25 @@ h6 {
   border: .25px hidden rgba(0,0,0, 0.09);
   border-radius: .25rem;
 }
+
+#wizard-logo{
+  position: absolute;
+  width: 327.21px;
+  height: 291px;
+  left: -45px;
+  top: -10px;
+  background: url('../assets/Wizard.png');
+  mix-blend-mode: overlay;
+}
+  
+
+#game_wrapper{
+  background: url('../assets/Rectangle.png'), radial-gradient(118.58% 72.31% at 33.26% 24.47%, #0F3671 13.96%, #020C1B 81.75%);
+}
+
 .card-body{
-  background-image: linear-gradient(#000c2f, #021657, rgba(9, 9, 9, 0.96));
-  border: .25px hidden rgba(0,0,0, 0);  
+  background: url('../assets/Rectangle.png'),radial-gradient(94.78% 143.27% at 50% 12.88%, rgba(29, 94, 192, 0.5) 13.96%, rgba(2, 12, 27, 0.5) 100%);
+  border: .25px hidden rgba(0,0,0, 0);
   border-radius: .25rem;
 }
 
