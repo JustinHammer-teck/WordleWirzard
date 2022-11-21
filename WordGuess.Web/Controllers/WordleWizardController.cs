@@ -26,9 +26,16 @@ public class WordleWizardController : Controller
         return View();
     }
 
+    public IActionResult WelcomeScreen()
+    {
+        return View();
+    }
+    
     [HttpPost]
     public IActionResult ProcessGuessWord(WordleWordView wordleWord)
     {
+        if (wordleWord == null) return Error();
+     
         var correctness = new string(wordleWord.Correctness);
         var wordle = new WordleSolver(_hostingEnvironment);
         var result = wordle.Handle(
@@ -36,7 +43,8 @@ public class WordleWizardController : Controller
             wordleWord.GuessWord.ToLower(),
             wordleWord.PossibleWords,
             wordleWord.Row,
-            wordleWord.UsedWords);
+            wordleWord.UsedWords,
+            wordleWord.CorrectnessOfUsedWords);
         return Ok(new { data = result});
     }
 

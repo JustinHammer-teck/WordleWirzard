@@ -14,16 +14,13 @@ var wordleWord = {
     GuessWord: "",
     Correctness: [],
     Row: 1,
-    UsedWords: []
+    UsedWords: [],
+    CorrectnessOfUsedWords:[]
 }
-
-var gameModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
-    keyboard: false
-});
 
 function Init() {
     GetStartWord();
-    KeyBoardRegister();
+    UpdateContextBoxColor(0, $(".word_cast_box"));
 }
 
 Init();
@@ -38,9 +35,9 @@ function GetStartWord() {
         success: function (data) {
             $.each(data.startWords, (key, value) => {
                 if (data.bestWord === value) {
-                    $wordList.append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
+                    $wordList.append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
                 } else {
-                    $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
+                    $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "</span>");
                 }
             });
         },
@@ -132,7 +129,7 @@ function UpdateWordCastWrapper(wordcast, $ctx) {
 
 $(".word_cast_box").click(function () {
     let status = parseInt($(this).attr("data-clickregisted"));
-    status = status < 4 ? status + 1 : 0;
+    status = status < 3 ? status + 1 : 0;
     if ($(this).attr("data-char")) {
         UpdateContextBoxColor(status, $(this));
         $(this).attr("data-clickregisted", status.toString());
@@ -182,11 +179,12 @@ function ClearWordCastState() {
 }
 
 function CastingNextWord(castingWord) {
+    console.log(castingWord);
     wordleWord.UsedWords.push(castingWord)
-    var index = 1;
-    var row = 1;
-    var rowIndex = 0;
-    var characterArray = Array.from(castingWord.toUpperCase());
+    let index = 1;
+    let row = 1;
+    let rowIndex = 0;
+    const characterArray = Array.from(castingWord.toUpperCase());
 
     while (wordGuessRowState[rowIndex].state == false) {
         if (row < 6 && rowIndex < 5) {
@@ -196,7 +194,7 @@ function CastingNextWord(castingWord) {
     }
     $("#word_guess_row_" + row).attr("data-rowtext", castingWord);
 
-    var correctness = [];
+    let correctness = [];
 
     characterArray.forEach(char => {
         var boxStatus = parseInt($("#word_cast_box_id_" + index).attr("data-clickregisted"));
@@ -209,53 +207,53 @@ function CastingNextWord(castingWord) {
                 break;
             case 3:
                 correctness.push('B');
-                break
+                break;
             default:
                 correctness.push('B');
+                break;
         }
-
+        
         $("#guess_word_" + index + "_row_" + row).text(char);
         UpdateContextBoxColor(boxStatus, $("#guess_box_id_" + index + "_row_" + row));
         UpdateAlphabet(boxStatus, char);
         index++;
     });
-    
-    if(correctness == "GGGGG"){
-        gameModal.toggle();
-    }
-    
     wordleWord.GuessWord = $("#word_cast_wrapper").attr("data-cast-word");
     wordleWord.Correctness = correctness;
+    wordleWord.CorrectnessOfUsedWords.push(correctness.join(""));
+    
+    ProcessGuessWord();
 
-
-    var $wordList = $("#next_word_list");
-    $wordList.empty();
-    ProcessGuessWord((data) => {
-        $.each(data.guessWords, (key, value) => {
-            if (data.bestWord === value) {
-                $wordList.append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
-            } else {
-                $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value + "</span>");
-            }
-        });
-
-        wordleWord.PossibleWords = data.guessWords;
-    });
-
+    wordleWord.Row = wordleWord.Row + 1;
     wordGuessRowState[rowIndex].state = false;
     wordGuessRowState[rowIndex + 1].state = true;
 }
 
-function ProcessGuessWord(callback) {
+function ProcessGuessWord() {
+    $("#next_word_list").empty();
+    $("#elimination_word").empty();
     $.ajax({
         type: 'POST',
         url: baseURl + "/ProcessGuessWord",
         dataType: 'JSON',
         contentType: 'application/x-www-form-urlencoded',
         data: {wordleWord},
-        async: false,
-        success: callback,
+        success: function (data) {
+            wordleWord.PossibleWords = data.data.possibleWords;
+            $("#elimination_word").append("<span class=\"word_list_item \" data-word=\"" + data.data.eliminationWord + "\" onclick='PopulateCastWord(\"" + data.data.eliminationWord + "\")'>" + data.data.eliminationWord.toUpperCase() + "</span>");
+            $.each(data.data.possibleWords, (key, value) => {
+                if (data.data.bestWord === value) {
+                    $("#next_word_list").append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
+                } else {
+                    $("#next_word_list").append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "</span>");
+                }
+            });
+        },
         error: function (ex) {
+            var r = jQuery.parseJSON(ex.responseText);
+            alert("Message: " + r.Message);
+            alert("StackTrace: " + r.StackTrace);
+            alert("ExceptionType: " + r.ExceptionType);
         }
     });
 }
@@ -263,16 +261,17 @@ function ProcessGuessWord(callback) {
 function UpdateContextBoxColor(status, $ctx) {
     switch (status) {
         case 1:
-            $ctx.css("background-color", "#ffc107");
+            $ctx.css("background", "linear-gradient(179.72deg, #F2C94C 0.24%, #554000 181.83%)");
             break;
         case 2:
-            $ctx.css("background-color", "#198754");
+            $ctx.css("background", "linear-gradient(179.72deg, #219653 0.24%, #0C2719 181.83%)");
             break;
         case 3:
-            $ctx.css("background-color", "#0d6efd");
-            break
+            $ctx.css("background", "linear-gradient(179.72deg, #497AC4 0.24%, #000000 154.4%)");
+            break;
         default:
-            $ctx.css("background-color", "rgba(0, 0, 0, 0)");
+            $ctx.css("background", "linear-gradient(179.72deg, #497AC4 0.24%, #000000 154.4%)");
+            break;
     }
 }
 
@@ -280,29 +279,22 @@ function UpdateAlphabet(status, char) {
     var $alphabet = $("#alphabet_char_" + char);
     switch (status) {
         case 1:
-            $alphabet.css("background-color", "#ffc107");
+            $alphabet.css("background", "linear-gradient(179.72deg, #F2C94C 0.24%, #554000 181.83%)");
             break;
         case 2:
-            $alphabet.css("background-color", "#198754");
+            $alphabet.css("background", "linear-gradient(179.72deg, #219653 0.24%, #0C2719 181.83%)");
             break;
         case 3:
             $alphabet.attr("disabled", true);
-            $alphabet.css("background-color", "#0d6efd");
-            break
+            $alphabet.css("background", "linear-gradient(179.72deg, #497AC4 0.24%, #000000 154.4%)");
+            break;
         default:
-            $alphabet.css("background-color", "rgba(0, 0, 0, 0)");
+            $alphabet.attr("disabled", true);
+            $alphabet.css("background", "linear-gradient(179.72deg, #497AC4 0.24%, #000000 154.4%)");
+            break;
     }
 }
 
-
-function KeyBoardRegister() {
-    $("body").keypress(function (e) {
-        if ($("#word_cast_wrapper").attr("data-cast-word").length != 5) {
-            var char = KeyCodeHandler(e.keyCode);
-            console.log(char);
-        }
-    });
-}
 
     
 

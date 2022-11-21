@@ -7,4 +7,5 @@ public class WordleWordView
     public char[] Correctness { get; set; }
     public int Row { get; set; }
     public string[] UsedWords { get; set; }
+    public string[] CorrectnessOfUsedWords { get; set; }
 }

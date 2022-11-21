@@ -15,165 +15,63 @@ public class WordleSolver
         pathToRoot = Path.Combine(_hostingEnvironment.WebRootPath);
     }
 
-    public WordleWords Handle(string correctness, string guess, string[] possibleWords, int row, string[] usedWords)
+    public WordleWords Handle(string correctness, string guess, string[] possibleWords, int row, string[] usedWords, string[] correctnessOfUsedWords)
     {
         var result = new WordleWords();
         if (row == 1)
         {
             possibleWords = File.ReadAllLines(pathToRoot + "/src/word_guess.txt");
         }
-        else if (possibleWords.Any() && row > 1)
+        else if (!possibleWords.Any() && row > 1)
         {
             throw new Exception("No Words to Process");
         }
 
         var guessWordsRef = WordRemover(correctness, guess, possibleWords);
 
-        result.GuessWords = guessWordsRef;
         result.BestWord = BestWord(guessWordsRef, LetterFeq(guessWordsRef));
-        // result.EliminationWord = GetEliminationWord(usedWords, guess , correctness);
+        result.PossibleWords = guessWordsRef.OrderByDescending(x => x == result.BestWord).ThenBy(i => i);
+        result.EliminationWord = GetEliminationWord(usedWords, correctnessOfUsedWords).First();
         return result;
     }
-
-
+    
     private string[] WordRemover(string result, string guess, string[] possibleWords)
     {
         var wordleHelper = new WordPlacementHelper();
         var badLetter = wordleHelper.BadLetter(result, guess);
         var wrongPlacement = wordleHelper.WrongPlacement(result, guess);
         var correctPlacement = wordleHelper.CorrectPlacement(result, guess);
-        var goodLetter = new char[10] { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
+        var goodLetter = wrongPlacement
+            .Concat(correctPlacement)
+            .Select(x => x.Item1)
+            .ToList();
 
-        for (var i = 0; i < correctPlacement.Length; i++)
-        {
-            goodLetter[i] = correctPlacement[i].Item1;
-        }
+        //Filter words does not contains any bad letter and good letter does not contain any bad letter
+        var acceptableWord1 = possibleWords
+            .Where(word => !badLetter.Any(c => word.Contains(c) && !goodLetter.Contains(c)))
+            .ToList();
 
-        for (var i = 5; i <= 9; i++)
-        {
-            goodLetter[i] = wrongPlacement[i - 5].Item1;
-        }
+        //Filter words contain correct placement letter at the same index Or contain wrong placement letter but not at the same index
+        var acceptableWord2 = acceptableWord1
+            .Where(fw => correctPlacement.All(cp => fw[cp.Item2] == cp.Item1))
+            .ToList();
 
-        var acceptableWord1 = new List<string>();
-        foreach (var word in possibleWords)
-        {
-            var check = false;
+        //Filter words contain wrong placement letter but not at the same index
+        var acceptableWord3 = acceptableWord2
+            .Where(words => wrongPlacement.All(wp => words[wp.Item2] != wp.Item1))
+            .ToList();
+        
+        var acceptableWord4 = acceptableWord3
+            .Where(fw => goodLetter.All(fw.Contains))
+            .ToList();
+        
+        return  acceptableWord4
+            .Where(word => 
+                badLetter
+                    .Where(x => goodLetter.Contains(x) && word != guess)
+                    .All(t => word.Count(x => x == t) == goodLetter.Count(x => x == t)))
+            .ToArray();
 
-            foreach (var c in badLetter)
-            {
-                if (word.Contains(c))
-                {
-                    if (goodLetter.Contains(c))
-                    {
-                        check = false;
-                    }
-                    else
-                    {
-                        check = true;
-                        break;
-                    }
-                }
-            }
-
-            if (check == false)
-            {
-                acceptableWord1.Add(word);
-            }
-        }
-
-        var acceptableWord2 = new List<string>();
-        foreach (var word in acceptableWord1.Distinct())
-        {
-            var check = false;
-
-            for (var i = 0; i < correctPlacement.Length; i++)
-            {
-                if (correctPlacement[i].Item1 == '\0') continue;
-                if (word[correctPlacement[i].Item2] != correctPlacement[i].Item1)
-                {
-                    check = true;
-                    break;
-                }
-            }
-
-            if (check == false)
-            {
-                acceptableWord2.Add(word);
-            }
-        }
-
-        var acceptableWord3 = new List<string>();
-        foreach (var word in acceptableWord2.Distinct())
-        {
-            var check = false;
-
-            for (var i = 0; i < wrongPlacement.Length; i++)
-            {
-                if (wrongPlacement[i].Item1 == '\0') continue;
-                if (word[wrongPlacement[i].Item2] == wrongPlacement[i].Item1)
-                {
-                    check = true;
-                    break;
-                }
-            }
-
-            if (check == false)
-            {
-                acceptableWord3.Add(word);
-            }
-        }
-
-
-        var acceptableWord4 = new List<string>();
-        foreach (var word in acceptableWord3.Distinct())
-        {
-            var check = false;
-
-            for (var i = 0; i < goodLetter.Length; i++)
-            {
-                if (goodLetter[i] == '\0') continue;
-                if (!word.Contains(goodLetter[i]))
-                {
-                    check = true;
-                    break;
-                }
-            }
-
-            if (check == false)
-            {
-                acceptableWord4.Add(word);
-            }
-        }
-
-        var acceptableWord5 = new List<string>();
-        foreach (var word in acceptableWord4)
-        {
-            var check = false;
-            foreach (var t in badLetter)
-            {
-                if (t == '\0') continue;
-                if (goodLetter.Contains(t))
-                {
-                    if (acceptableWord4.Count(x => x.Contains(t)) !=
-                        goodLetter.Count(x => x == t))
-                    {
-                        check = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            if (check == false)
-            {
-                acceptableWord5.Add(word);
-            }
-        }
-
-        return acceptableWord5.Distinct().ToArray();
     }
 
     private (string, double)[] WordScore(string[] possibleWord, (char, int[])[] letterFeq)
@@ -257,28 +155,34 @@ public class WordleSolver
         return letterfeq;
     }
 
-    public IEnumerable<string> GetEliminationWord(string[] usedWords, string guess, string result)
+    public IEnumerable<string> GetEliminationWord(string[] usedWords, string[] correctnessOfUsedWords)
     {
         var allWordList = File.ReadAllLines(pathToRoot + "/src/word_answer.txt");
-        var correctness = result.ToCharArray();
-        var guessletters = guess.ToCharArray();
-    
-        var correctletters = guessletters
-            .Select((value, index) => new { value, index })
-            .Where((value, index)  => correctness[index] == 'G')
-            .Select(args => args.value);
-    
-        var goodletters = guessletters
-            .Select((value, index) => new { value, index })
-            .Where((value, index)  => correctness[index] == 'Y')
-            .Select(args => args.value);
-    
+        var correctletters = new List<char>();
+        var goodletters = new List<char>();
+
+        for (var i = 0; i < usedWords.Length; i++)
+        {
+            for (var j = 0; j < usedWords[i].Length; j++)
+            {
+                if (correctnessOfUsedWords[i][j] == 'G')
+                {
+                    correctletters.Add(usedWords[i][j]);
+                }
+                
+                if (correctnessOfUsedWords[i][j] == 'Y')
+                {
+                    correctletters.Add(usedWords[i][j]);
+                }
+            }
+        }
+        
         //Get Words Where there are no duplication letter in string
         var possibleWordRef = allWordList
             .Where(word => !usedWords.Contains(word))
             .Where(word => !word.Any(correctletters.Contains))
             .Where(word => !word.Any(goodletters.Contains));
-    
+
         return possibleWordRef;
     }
 }
