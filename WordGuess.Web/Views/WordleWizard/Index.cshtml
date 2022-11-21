@@ -3,66 +3,82 @@
     char[] alphabetRow1 = { 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P' };
     char[] alphabetRow2 = { 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L' };
     char[] alphabetRow3 = { 'Z', 'X', 'C', 'V', 'B', 'N', 'M' };
-
 }
 
-<div id="game_container" class="container card mt-5 mx-auto" >
-    <div class="card-body">
-        <div class="row m-1 my-3">
-            <h5 class="card-title text-warning pb-3">Wordle Whiz</h5>
-            <div class="card col-10 w-auto">
-                <div class="card-body">
-                    <h6 class="position-relative game_title">
-                        NEXT WORD TO PLAY
-                        <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
-                    </h6>
-                    <div id="word_cast_wrapper" class="col-7 d-flex flex-row" data-cast-word="">
-                        @for (int i = 1; i < 6; i++)
-                        {
-                            <div id="word_cast_box_id_@i" class="word_cast_box word_box position-relative word_cast_box-choice" data-char="" data-clickregisted="0">
-                                <span id="word_cast-@i" class="word_cast position-absolute top-50 start-50 translate-middle game_word"></span>
+<div id="game_container" class="container card mt-5 mx-auto">
+    <div id="wizard-logo"></div>
+    <div id="game_wrapper" class="card-body">
+        <div class="d-flex flex-row-reverse my-3">
+            <div class="row col-10 pe-3" style="width: 70%">
+                <div class="d-inline-flex w-100">
+                    <img id="game_title-icon" src="@Url.Content("~/assets/Vector.svg")" alt="help-icon">
+                    <h5 id="game_title">Wordle Whiz</h5>
+                    <a class="my-auto ms-auto text-warning" asp-action="WelcomeScreen">HELP!</a>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-inline-flex">
+                            <h6 class="game_title ps-3 pe-1">
+                                NEXT WORD TO PLAY
+                            </h6>
+                            <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                        </div>
+                        <div id="word_cast_wrapper" class="col-7 d-flex flex-row px-3" data-cast-word="">
+                            @for (int i = 1; i < 6; i++)
+                            {
+                                <div id="word_cast_box_id_@i" class="word_cast_box word_box position-relative word_cast_box-choice" data-char="" data-clickregisted="0">
+                                    <span id="word_cast-@i" class="word_cast position-absolute top-50 start-50 translate-middle game_word"></span>
+                                </div>
+                            }
+                            <div class="mx-2">
+                                <button id="cast_btn" class="game_btn btn-lg btn-success">
+                                    Cast
+                                </button>
                             </div>
-                        }
-                        <div>
-                            <button id="cast_btn" class="game_btn btn-lg btn-success">
-                                Cast
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row m-1">
-            <div class="col-5 p-0 " style="height: auto ;max-height: 355px; display: flex; flex-direction: column">
+            <div class="col-5 p-0 d-flex flex-column">
                 <div class="card">
                     <div class="card-body">
-                        <h6 class="position-relative game_title">
-                            MAGIC WAND
-                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
-                        </h6>
+                        <div class="d-inline-flex">
+                            <h6 class="game_title pe-1">
+                                MAGIC WAND
+                            </h6>
+                            <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                        </div>
+                        <div id="elimination_word" class="word_list_container">
+                        </div>
                     </div>
                 </div>
-                <div class="card my-3">
+                <div class="card my-3 flex">
                     <div class="card-body">
-                        <h6 class="position-relative game_title">
-                            MAGIC WORD LIST
-                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
-                        </h6>
+                        <div class="d-inline-flex w-100">
+                            <h6 class="game_title pe-1">
+                                MAGIC WORD LIST
+                            </h6>
+                            <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                        </div>
                         <div id="next_word_list" class="word_list_container">
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-7 p-0">
-                <div class="card" style="height: auto ;max-height: 355px;margin-left: 15px ; width: auto;">
+                <div id="wordle-guess-box" class="card">
                     <div class="card-body">
-                        <div class="d-flex flex-row justify-content-between">
-                            <h6 class="position-relative game_title">
-                                WORDLE GUESSES
-                                <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
-                            </h6>
+                        <div class="d-flex">
+                            <div class="d-inline-flex w-100">
+                                <h6 class="game_title pe-1">
+                                    WORDLE GUESS
+                                </h6>
+                                <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                            </div>
                             <div class="dropdown">
-                                <a class="dropdown-toggle dropdown-btn text-warning" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="dropdown-toggle dropdown-btn text-warning game_title" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                                     CLEAR ROW
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -98,12 +114,12 @@
         <div class="row m-1 my-3">
             <div class="card ml-2 col-12">
                 <div class="card-body">
-                    <h6 class="my-2">
-                        <span class="position-relative game_title">
+                    <div class="d-inline-flex w-100">
+                        <h6 class="game_title pe-1">
                             ALPHABET
-                            <span class="position-absolute translate-middle badge rounded-pill bg-warning">i</span>
-                        </span>
-                    </h6>
+                        </h6>
+                        <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                    </div>
                     <div id="alphabetRow1" class="d-flex flex-row justify-content-center">
                         @foreach (var c in alphabetRow1)
                         {

@@ -15,7 +15,7 @@ public class ValidationService
 
     public bool ValidationWord(string word)
     {
-        var allowedWordsFile = File.ReadLines(pathToRoot + "/src/allowed_words.txt");
+        var allowedWordsFile = File.ReadLines(pathToRoot + "/src/word_guess.txt");
         return allowedWordsFile.Contains(word.ToLower());
     }
 }

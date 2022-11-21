@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using WordGuess.Web.Models;
 using WordGuess.Web.Services;
@@ -27,14 +26,26 @@ public class WordleWizardController : Controller
         return View();
     }
 
+    public IActionResult WelcomeScreen()
+    {
+        return View();
+    }
+    
     [HttpPost]
     public IActionResult ProcessGuessWord(WordleWordView wordleWord)
     {
+        if (wordleWord == null) return Error();
+     
         var correctness = new string(wordleWord.Correctness);
         var wordle = new WordleSolver(_hostingEnvironment);
-        var result = wordle.Handle(correctness, wordleWord.GuessWord.ToLower(), wordleWord.PossibleWords, wordleWord.Row);
-        
-        return Ok(result);
+        var result = wordle.Handle(
+            correctness,
+            wordleWord.GuessWord.ToLower(),
+            wordleWord.PossibleWords,
+            wordleWord.Row,
+            wordleWord.UsedWords,
+            wordleWord.CorrectnessOfUsedWords);
+        return Ok(new { data = result});
     }
 
     [HttpGet]
@@ -43,7 +54,7 @@ public class WordleWizardController : Controller
         var startwords = System.IO.File.ReadAllText(pathToRoot + "/src/start_word.txt");
         var startwordList = startwords.Split('\n');
         var wordle = new WordleSolver(_hostingEnvironment);
-        
+
         return Json(new WordleStartWords()
         {
             StartWords = startwordList,
