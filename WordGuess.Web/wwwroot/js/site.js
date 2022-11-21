@@ -20,7 +20,7 @@ var wordleWord = {
 
 function Init() {
     GetStartWord();
-    UpdateContextBoxColor(0, $(".word_cast_box"));
+    UpdateContextBoxColor(3, $(".word_cast_box"));
 }
 
 Init();
@@ -60,11 +60,11 @@ $(".dropdown-item").click(function () {
         if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
             var text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
             $.each(Array.from(text), function (index, char) {
-                UpdateAlphabet(0, char);
+                UpdateAlphabet(3, char);
             });
             $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
             $.each($("#word_guess_row_" + rowUpdate).children(), function () {
-                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "rgba(0, 0, 0, 0)");
+                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background", "rgba(0, 0, 0, 0)");
                 $("#guess_word_" + index + "_row_" + rowUpdate).text("");
                 wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == rowUpdate ? true : false;
                 index++;
@@ -75,9 +75,9 @@ $(".dropdown-item").click(function () {
             $.each($("#word_guess_row_" + rowUpdate).children(), function () {
                 var text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
                 $.each(Array.from(text.toUpperCase()), function (index, char) {
-                    UpdateAlphabet(0, char);
+                    UpdateAlphabet(3, char);
                 });
-                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background-color", "rgba(0, 0, 0, 0)");
+                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background", "rgba(0, 0, 0, 0)");
                 $("#guess_word_" + index + "_row_" + rowUpdate).text("");
                 wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
                 index++;
@@ -87,6 +87,10 @@ $(".dropdown-item").click(function () {
             index = 1;
         })
     }
+    wordleWord.PossibleWords = [];
+    wordleWord.UsedWords = [];
+    wordleWord.CorrectnessOfUsedWords = [];
+    wordleWord.Row = 1;
     GetStartWord();
 
 });
@@ -129,7 +133,7 @@ function UpdateWordCastWrapper(wordcast, $ctx) {
 
 $(".word_cast_box").click(function () {
     let status = parseInt($(this).attr("data-clickregisted"));
-    status = status < 3 ? status + 1 : 0;
+    status = status > 1 && status <= 3 ? status - 1 : 3;
     if ($(this).attr("data-char")) {
         UpdateContextBoxColor(status, $(this));
         $(this).attr("data-clickregisted", status.toString());
@@ -171,9 +175,9 @@ $("#cast_btn").click(function () {
 
 function ClearWordCastState() {
     $(".word_cast").text("");
-    $(".word_cast_box").attr("data-clickregisted", 0);
+    $(".word_cast_box").attr("data-clickregisted", 3);
     $(".word_cast_box").attr("data-char", '');
-    UpdateContextBoxColor(0, $(".word_cast_box"));
+    UpdateContextBoxColor(3, $(".word_cast_box"));
     $("#word_cast_wrapper").attr("data-cast-word", "");
     guessWordBoxIndex = 1;
 }
@@ -232,12 +236,12 @@ function CastingNextWord(castingWord) {
 function ProcessGuessWord() {
     $("#next_word_list").empty();
     $("#elimination_word").empty();
+    console.log(JSON.stringify(wordleWord));
     $.ajax({
         type: 'POST',
         url: baseURl + "/ProcessGuessWord",
-        dataType: 'JSON',
-        contentType: 'application/x-www-form-urlencoded',
         data: {wordleWord},
+        dataType: 'json',
         success: function (data) {
             wordleWord.PossibleWords = data.data.possibleWords;
             $("#elimination_word").append("<span class=\"word_list_item \" data-word=\"" + data.data.eliminationWord + "\" onclick='PopulateCastWord(\"" + data.data.eliminationWord + "\")'>" + data.data.eliminationWord.toUpperCase() + "</span>");
@@ -250,10 +254,7 @@ function ProcessGuessWord() {
             });
         },
         error: function (ex) {
-            var r = jQuery.parseJSON(ex.responseText);
-            alert("Message: " + r.Message);
-            alert("StackTrace: " + r.StackTrace);
-            alert("ExceptionType: " + r.ExceptionType);
+            console.log("Something Happened");
         }
     });
 }

@@ -50,6 +50,8 @@ h6 {
   min-width: 500px;
   height: 100%;
   min-height: 1000px;
+  max-height: 1080px;
+  position: relative;
 }
 #game_selector{
   margin: auto;
@@ -59,6 +61,8 @@ h6 {
   height: auto ;
   max-height: 202px;
   overflow-y: scroll;
+  direction: rtl;
+  scrollbar-color: #ffc107 rgba(0,0,0, 0.09); 
 }
 
 #game_title{
@@ -130,7 +134,7 @@ h6 {
 .game_btn{
   font-family: PressStart2P, sans-serif;
   font-size: 12px;
-  margin-bottom: 5px;
+  margin: 0.25rem 0;
   min-width: 100px;
   max-height: 45px;
   padding: 12px 0;
@@ -168,11 +172,10 @@ h6 {
 
 #wizard-logo{
   position: absolute;
-  width: 327.21px;
-  height: 291px;
-  left: -45px;
+  width: 269px;
+  height: 282px;
   top: -10px;
-  background: url('../assets/Wizard.png');
+  background: url('../assets/wizard.png');
   mix-blend-mode: overlay;
 }
   
@@ -198,3 +201,22 @@ h6 {
   margin-bottom: 1rem;
   width: auto;
 }
+
+#game_welcome-background{
+  background: url('../assets/wizard-bg.png');
+  position: absolute;
+  width: 630px;
+  height: 935px;
+  z-index: 50;
+  mix-blend-mode: overlay;
+  transform: translate(100%, 0%);
+}
+
+
+#game_welcome{
+  width: 610px;
+  height: 920px;
+  background: url('../assets/wordle-welcome.png');
+  z-index: 1000;
+}
+
