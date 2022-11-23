@@ -1,4 +1,6 @@
-﻿var baseURl = "https://localhost:7231/WordleWizard";
+﻿// var baseURl = "https://localhost:7231/WordleWizard";
+var baseURl = window.location.origin + "/WordleWizard";
+
 var guessWordBoxIndex = 1;
 var wordGuessRowState = [
     {"row": 1, "state": true},
@@ -21,6 +23,7 @@ var wordleWord = {
 function Init() {
     GetStartWord();
     UpdateContextBoxColor(3, $(".word_cast_box"));
+    Keyboard();
 }
 
 Init();
@@ -42,10 +45,7 @@ function GetStartWord() {
             });
         },
         error: function (ex) {
-            var r = jQuery.parseJSON(ex.responseText);
-            alert("Message: " + r.Message);
-            alert("StackTrace: " + r.StackTrace);
-            alert("ExceptionType: " + r.ExceptionType);
+            console.log("something when wrong");
         }
     });
 }
@@ -96,11 +96,10 @@ $(".dropdown-item").click(function () {
 });
 
 function PopulateCastWord(word) {
-    var $wordcast = $("#word_cast-" + guessWordBoxIndex);
-
     $("#word_cast_wrapper").attr("data-cast-word", word);
 
-    UpdateWordCastWrapper(word, $wordcast);
+    UpdateWordCastWrapper(word);
+    guessWordBoxIndex = 6;
 }
 
 $(".word_box-choice").click(function () {
@@ -111,24 +110,25 @@ $(".word_box-choice").click(function () {
 });
 
 function WordInput(letter) {
-    var $wordcast = $("#word_cast-" + guessWordBoxIndex);
-    var wordcast = $("#word_cast_wrapper").attr("data-cast-word");
-
+    let wordcast = $("#word_cast_wrapper").attr("data-cast-word");
     wordcast = guessWordBoxIndex < 6 ? wordcast.concat(letter) : wordcast;
-    UpdateWordCastWrapper(wordcast, $wordcast);
+    UpdateWordCastWrapper(wordcast);
 
     $("#word_cast_wrapper").attr("data-cast-word", wordcast);
     guessWordBoxIndex = guessWordBoxIndex < 6 ? guessWordBoxIndex + 1 : 6;
 }
 
-function UpdateWordCastWrapper(wordcast, $ctx) {
-    var index = 1;
-    var characterArray = Array.from(wordcast.toUpperCase());
-    characterArray.forEach(char => {
-        $("#word_cast-" + index).text(char);
-        $("#word_cast_box_id_" + index).attr("data-char", char);
-        index++;
-    });
+function UpdateWordCastWrapper(wordcast) {
+    let characterArray = Array.from(wordcast.toUpperCase());
+    for (let i = 1; i < 6; i++){
+        let castChar = characterArray[i-1] == undefined ? '' : characterArray[i-1];
+        if(castChar == ''){
+            $("#word_cast_box_id_" + i).attr("data-clickregisted", 3);
+            UpdateContextBoxColor(3, $("#word_cast_box_id_" + i)); 
+        }
+        $("#word_cast-" + i).text(castChar);
+        $("#word_cast_box_id_" + i).attr("data-char", castChar);
+    }
 }
 
 $(".word_cast_box").click(function () {
@@ -158,10 +158,10 @@ function IsWordHasLengthOfFive(wordcast) {
 }
 
 $("#cast_btn").click(function () {
-    var castingWord = $("#word_cast_wrapper").attr("data-cast-word");
+    let castingWord = $("#word_cast_wrapper").attr("data-cast-word");
     $(".word_list_item").filter(":contains(" + castingWord + ")").remove();
 
-    var validationResult;
+    let validationResult;
     WordValidation((data) => {
         validationResult = data.state;
     }, castingWord);
@@ -183,7 +183,6 @@ function ClearWordCastState() {
 }
 
 function CastingNextWord(castingWord) {
-    console.log(castingWord);
     wordleWord.UsedWords.push(castingWord)
     let index = 1;
     let row = 1;
@@ -201,7 +200,7 @@ function CastingNextWord(castingWord) {
     let correctness = [];
 
     characterArray.forEach(char => {
-        var boxStatus = parseInt($("#word_cast_box_id_" + index).attr("data-clickregisted"));
+        let boxStatus = parseInt($("#word_cast_box_id_" + index).attr("data-clickregisted"));
         switch (boxStatus) {
             case 1:
                 correctness.push('Y');
@@ -236,7 +235,6 @@ function CastingNextWord(castingWord) {
 function ProcessGuessWord() {
     $("#next_word_list").empty();
     $("#elimination_word").empty();
-    console.log(JSON.stringify(wordleWord));
     $.ajax({
         type: 'POST',
         url: baseURl + "/ProcessGuessWord",
@@ -296,6 +294,41 @@ function UpdateAlphabet(status, char) {
     }
 }
 
+function isAlphaKey(evt)
+{
+    evt = (evt) ? evt : event;
+    let charCode = (evt.charCode) ? evt.charCode : ((evt.keyCode) ? evt.keyCode :((evt.which) ? evt.which : 0));
+    if(charCode > 32 && (charCode < 65 || charCode > 90) && (charCode < 97 || charCode > 122)){return false;}
+    return true;
+}
+
+function WordDelete(){
+    let wordcast = $("#word_cast_wrapper").attr("data-cast-word");
+    wordcast = guessWordBoxIndex > 0 ? wordcast.slice(0, -1) : wordcast;
+    UpdateWordCastWrapper(wordcast);
+
+    $("#word_cast_wrapper").attr("data-cast-word", wordcast);
+    guessWordBoxIndex = guessWordBoxIndex > 1 ? guessWordBoxIndex - 1 : guessWordBoxIndex;
+}
+
+function Keyboard(){
+    window.addEventListener("keyup", function (event) {
+        if (event.defaultPrevented) {
+            return; // Do nothing if the event was already processed
+        }
+        
+        if(event.key === "Backspace"){
+            WordDelete();
+        }
+        
+        if(isAlphaKey(event) && event.key !== "Backspace"){
+            WordInput(event.key);
+        }
+
+        // Cancel the default action to avoid it being handled twice
+        event.preventDefault();
+    }, true);
+}
 
     
 
