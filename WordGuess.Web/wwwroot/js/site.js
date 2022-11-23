@@ -100,7 +100,6 @@ function PopulateCastWord(word) {
 
     UpdateWordCastWrapper(word);
     guessWordBoxIndex = 6;
-    console.log(guessWordBoxIndex);
 }
 
 $(".word_box-choice").click(function () {
@@ -111,23 +110,22 @@ $(".word_box-choice").click(function () {
 });
 
 function WordInput(letter) {
-    var wordcast = $("#word_cast_wrapper").attr("data-cast-word");
-    console.log(letter);
-    console.log(wordcast);
+    let wordcast = $("#word_cast_wrapper").attr("data-cast-word");
     wordcast = guessWordBoxIndex < 6 ? wordcast.concat(letter) : wordcast;
-    console.log(wordcast);
     UpdateWordCastWrapper(wordcast);
 
     $("#word_cast_wrapper").attr("data-cast-word", wordcast);
     guessWordBoxIndex = guessWordBoxIndex < 6 ? guessWordBoxIndex + 1 : 6;
-    console.log(guessWordBoxIndex);
 }
 
 function UpdateWordCastWrapper(wordcast) {
-    var characterArray = Array.from(wordcast.toUpperCase());
+    let characterArray = Array.from(wordcast.toUpperCase());
     for (let i = 1; i < 6; i++){
-        let castChar = characterArray[i-1] == undefined ? '' : characterArray[i-1]
-        console.log(castChar);
+        let castChar = characterArray[i-1] == undefined ? '' : characterArray[i-1];
+        if(castChar == ''){
+            $("#word_cast_box_id_" + i).attr("data-clickregisted", 3);
+            UpdateContextBoxColor(3, $("#word_cast_box_id_" + i)); 
+        }
         $("#word_cast-" + i).text(castChar);
         $("#word_cast_box_id_" + i).attr("data-char", castChar);
     }
@@ -160,10 +158,10 @@ function IsWordHasLengthOfFive(wordcast) {
 }
 
 $("#cast_btn").click(function () {
-    var castingWord = $("#word_cast_wrapper").attr("data-cast-word");
+    let castingWord = $("#word_cast_wrapper").attr("data-cast-word");
     $(".word_list_item").filter(":contains(" + castingWord + ")").remove();
 
-    var validationResult;
+    let validationResult;
     WordValidation((data) => {
         validationResult = data.state;
     }, castingWord);
@@ -185,7 +183,6 @@ function ClearWordCastState() {
 }
 
 function CastingNextWord(castingWord) {
-    console.log(castingWord);
     wordleWord.UsedWords.push(castingWord)
     let index = 1;
     let row = 1;
@@ -203,7 +200,7 @@ function CastingNextWord(castingWord) {
     let correctness = [];
 
     characterArray.forEach(char => {
-        var boxStatus = parseInt($("#word_cast_box_id_" + index).attr("data-clickregisted"));
+        let boxStatus = parseInt($("#word_cast_box_id_" + index).attr("data-clickregisted"));
         switch (boxStatus) {
             case 1:
                 correctness.push('Y');
@@ -238,7 +235,6 @@ function CastingNextWord(castingWord) {
 function ProcessGuessWord() {
     $("#next_word_list").empty();
     $("#elimination_word").empty();
-    console.log(JSON.stringify(wordleWord));
     $.ajax({
         type: 'POST',
         url: baseURl + "/ProcessGuessWord",
