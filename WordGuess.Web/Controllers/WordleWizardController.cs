@@ -26,13 +26,13 @@ public class WordleWizardController : Controller
         return View();
     }
 
-    public IActionResult WelcomeScreen()
+    public IActionResult WorldSolver()
     {
         return View();
     }
     
     [HttpPost]
-    public IActionResult ProcessGuessWord(WordleWordView wordleWord)
+    public IActionResult ProcessGuessWord([FromForm] WordleWordView wordleWord)
     {
         if (wordleWord == null) return Error();
      
