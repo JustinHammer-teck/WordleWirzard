@@ -17,7 +17,7 @@ var wordleWord = {
     Correctness: [],
     Row: 1,
     UsedWords: [],
-    CorrectnessOfUsedWords:[]
+    CorrectnessOfUsedWords: []
 }
 
 function Init() {
@@ -37,11 +37,7 @@ function GetStartWord() {
         dataType: 'json',
         success: function (data) {
             $.each(data.startWords, (key, value) => {
-                if (data.bestWord === value) {
-                    $wordList.append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
-                } else {
-                    $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "</span>");
-                }
+                $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "</span>");
             });
         },
         error: function (ex) {
@@ -51,10 +47,9 @@ function GetStartWord() {
 }
 
 $(".dropdown-item").click(function () {
-    var rowUpdate = 1;
-    var index = 1;
-    var value = $(this).attr("data-value");
-
+    let rowUpdate = 1;
+    let index = 1;
+    let value = $(this).attr("data-value");
 
     if (value == 1) {
         if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
@@ -73,10 +68,6 @@ $(".dropdown-item").click(function () {
     } else if (value == 2) {
         $.each($(".word_guess_row"), function () {
             $.each($("#word_guess_row_" + rowUpdate).children(), function () {
-                var text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
-                $.each(Array.from(text.toUpperCase()), function (index, char) {
-                    UpdateAlphabet(3, char);
-                });
                 $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background", "rgba(0, 0, 0, 0)");
                 $("#guess_word_" + index + "_row_" + rowUpdate).text("");
                 wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
@@ -85,12 +76,14 @@ $(".dropdown-item").click(function () {
             $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
             rowUpdate++;
             index = 1;
-        })
+        });
     }
     wordleWord.PossibleWords = [];
     wordleWord.UsedWords = [];
     wordleWord.CorrectnessOfUsedWords = [];
     wordleWord.Row = 1;
+    $(".word_box-choice").attr("disabled", false);
+    $(".word_box-choice").css("background", "");
     GetStartWord();
 
 });
@@ -120,11 +113,11 @@ function WordInput(letter) {
 
 function UpdateWordCastWrapper(wordcast) {
     let characterArray = Array.from(wordcast.toUpperCase());
-    for (let i = 1; i < 6; i++){
-        let castChar = characterArray[i-1] == undefined ? '' : characterArray[i-1];
-        if(castChar == ''){
+    for (let i = 1; i < 6; i++) {
+        let castChar = characterArray[i - 1] == undefined ? '' : characterArray[i - 1];
+        if (castChar == '') {
             $("#word_cast_box_id_" + i).attr("data-clickregisted", 3);
-            UpdateContextBoxColor(3, $("#word_cast_box_id_" + i)); 
+            UpdateContextBoxColor(3, $("#word_cast_box_id_" + i));
         }
         $("#word_cast-" + i).text(castChar);
         $("#word_cast_box_id_" + i).attr("data-char", castChar);
@@ -215,7 +208,7 @@ function CastingNextWord(castingWord) {
                 correctness.push('B');
                 break;
         }
-        
+
         $("#guess_word_" + index + "_row_" + row).text(char);
         UpdateContextBoxColor(boxStatus, $("#guess_box_id_" + index + "_row_" + row));
         UpdateAlphabet(boxStatus, char);
@@ -224,7 +217,7 @@ function CastingNextWord(castingWord) {
     wordleWord.GuessWord = $("#word_cast_wrapper").attr("data-cast-word");
     wordleWord.Correctness = correctness;
     wordleWord.CorrectnessOfUsedWords.push(correctness.join(""));
-    
+
     ProcessGuessWord();
 
     wordleWord.Row = wordleWord.Row + 1;
@@ -240,15 +233,12 @@ function ProcessGuessWord() {
         url: baseURl + "/ProcessGuessWord",
         data: {wordleWord},
         dataType: 'json',
+        async: false,
         success: function (data) {
             wordleWord.PossibleWords = data.data.possibleWords;
             $("#elimination_word").append("<span class=\"word_list_item \" data-word=\"" + data.data.eliminationWord + "\" onclick='PopulateCastWord(\"" + data.data.eliminationWord + "\")'>" + data.data.eliminationWord.toUpperCase() + "</span>");
             $.each(data.data.possibleWords, (key, value) => {
-                if (data.data.bestWord === value) {
-                    $("#next_word_list").append("<span class=\"word_list_item position-relative\" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "<span class='position-absolute top-10 start-70 translate-middle badge sm-badge rounded-pill bg-warning'>*</span> </span>");
-                } else {
-                    $("#next_word_list").append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "</span>");
-                }
+                $("#next_word_list").append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "</span>");
             });
         },
         error: function (ex) {
@@ -294,15 +284,16 @@ function UpdateAlphabet(status, char) {
     }
 }
 
-function isAlphaKey(evt)
-{
+function isAlphaKey(evt) {
     evt = (evt) ? evt : event;
-    let charCode = (evt.charCode) ? evt.charCode : ((evt.keyCode) ? evt.keyCode :((evt.which) ? evt.which : 0));
-    if(charCode > 32 && (charCode < 65 || charCode > 90) && (charCode < 97 || charCode > 122)){return false;}
+    let charCode = (evt.charCode) ? evt.charCode : ((evt.keyCode) ? evt.keyCode : ((evt.which) ? evt.which : 0));
+    if (charCode > 32 && (charCode < 65 || charCode > 90) && (charCode < 97 || charCode > 122)) {
+        return false;
+    }
     return true;
 }
 
-function WordDelete(){
+function WordDelete() {
     let wordcast = $("#word_cast_wrapper").attr("data-cast-word");
     wordcast = guessWordBoxIndex > 0 ? wordcast.slice(0, -1) : wordcast;
     UpdateWordCastWrapper(wordcast);
@@ -311,17 +302,18 @@ function WordDelete(){
     guessWordBoxIndex = guessWordBoxIndex > 1 ? guessWordBoxIndex - 1 : guessWordBoxIndex;
 }
 
-function Keyboard(){
+function Keyboard() {
+    //BUG: keyboard auto type in not alphabet letter
     window.addEventListener("keyup", function (event) {
         if (event.defaultPrevented) {
             return; // Do nothing if the event was already processed
         }
-        
-        if(event.key === "Backspace"){
+
+        if (event.key === "Backspace") {
             WordDelete();
         }
-        
-        if(isAlphaKey(event) && event.key !== "Backspace"){
+
+        if (isAlphaKey(event) && event.key !== "Backspace") {
             WordInput(event.key);
         }
 

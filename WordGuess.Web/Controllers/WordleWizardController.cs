@@ -32,6 +32,7 @@ public class WordleWizardController : Controller
     }
     
     [HttpPost]
+    [RequestSizeLimit(100_000_000)]
     public IActionResult ProcessGuessWord([FromForm] WordleWordView wordleWord)
     {
         if (wordleWord == null) return Error();

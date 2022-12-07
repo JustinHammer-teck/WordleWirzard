@@ -1,8 +1,13 @@
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()
     .AddRazorRuntimeCompilation();
+
+builder.Services.Configure<FormOptions>(options => options.ValueCountLimit = 100_000_000);
 
 var app = builder.Build();
 
