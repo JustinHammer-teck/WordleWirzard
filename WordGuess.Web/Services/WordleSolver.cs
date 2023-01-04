@@ -1,3 +1,4 @@
+using WordGuess.Web.Exceptions;
 using WordGuess.Web.Helper;
 using WordGuess.Web.ViewModels;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -18,29 +19,35 @@ public class WordleSolver
     public WordleWords Handle(string correctness, string guess, IEnumerable<string> possibleWords, int row,
         string[] usedWords, string[] correctnessOfUsedWords)
     {
-        var result = new WordleWords();
+        var eliminationWordService = new EliminationWordService(_hostingEnvironment);
         if (row == 1)
         {
             possibleWords = File.ReadAllLines(pathToRoot + "/src/word_answer.txt");
         }
         else if (!possibleWords.Any() && row > 1)
         {
-            throw new Exception("No Words to Process");
+            throw new WordleWordsException("No Words to Process");
         }
 
         var guessWordsRef = WordRemover(correctness, guess, possibleWords);
-
-        result.BestWord = BestWord(guessWordsRef, LetterFeq(guessWordsRef));
-        result.PossibleWords = WordScore(guessWordsRef, LetterFeq(guessWordsRef))
-            .OrderBy(x => x.Item2)
-            .Select(x => x.Item1)
-            .ToList();
-        var eliminationWords = GetEliminationWord(usedWords, correctnessOfUsedWords);
-        // var eliminationWordsRef = WordScore(eliminationWords, LetterFeq(eliminationWords))
-        //     .OrderBy(x => x.Item2)
-        //     .Select(x => x.Item1);
-        result.EliminationWord = eliminationWords
-            .First();
+        var eliminationWords = eliminationWordService.GetEliminationWord(
+            usedWords, 
+            correctnessOfUsedWords,
+            possibleWords, 
+            LetterFeq(guessWordsRef));
+        
+        var result = new WordleWords()
+        {
+            BestWord = BestWord(guessWordsRef, LetterFeq(guessWordsRef)),
+            PossibleWords = WordScore(guessWordsRef, LetterFeq(guessWordsRef))
+                .OrderBy(x => x.Item2)
+                .Select(x => x.Item1)
+                .ToList(),
+            EliminationWord = eliminationWords.OrderByDescending(x => x.Item2)
+                .ThenByDescending(x => x.Item3)
+                .Select(x => x.Item1)
+                .First()
+        };
         return result;
     }
 
@@ -57,6 +64,7 @@ public class WordleSolver
 
         //Filter words does not contains any bad letter and good letter does not contain any bad letter
         var acceptableWord1 = possibleWords
+            .Where(word => word != guess)
             .Where(word => !badLetter.Any(c => word.Contains(c) && !goodLetter.Contains(c)))
             .ToList();
 
@@ -77,7 +85,7 @@ public class WordleSolver
         return acceptableWord4
             .Where(word =>
                 badLetter
-                    .Where(x => goodLetter.Contains(x) && word != guess)
+                    .Where(x => goodLetter.Contains(x))
                     .All(t => word.Count(x => x == t) == goodLetter.Count(x => x == t)))
             .ToArray();
     }
@@ -85,7 +93,7 @@ public class WordleSolver
     private IEnumerable<(string, double)> WordScore(IEnumerable<string> possibleWord,
         IEnumerable<(char, int[])> letterFeq)
     {
-        var words = new List<(string, double)>();
+        var wordValue = new List<(string, double)>();
         int[] maxFeq = { 0, 0, 0, 0, 0 };
         foreach (var c in letterFeq)
         {
@@ -102,7 +110,7 @@ public class WordleSolver
         {
             var worRef = word.ToLower();
             double score = 1;
-            for (int i = 0; i < 5; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var letter = worRef[i];
                 var index = letterFeq
@@ -111,15 +119,15 @@ public class WordleSolver
                 score *= 1 + Math.Pow((index.Item2[i] - maxFeq[i]), 2);
             }
 
-            words.Add((word, score));
+            wordValue.Add((word, score));
         }
 
-        return words;
+        return wordValue;
     }
 
     public string BestWord(string[] possibleWord, IEnumerable<(char, int[])> letterFeq)
     {
-        double maxScore = 100000000000000000;
+        double maxScore = 9999999999999999999;
         var result = "";
         var score = WordScore(possibleWord, letterFeq);
 
@@ -159,33 +167,4 @@ public class WordleSolver
 
         return letterfeq;
     }
-
-    public IEnumerable<string> GetEliminationWord(string[] usedWords, string[] correctnessOfUsedWords)
-    {
-        var allWordList = File.ReadAllLines(pathToRoot + "/src/word_guess.txt");
-        var correctletters = new List<char>();
-        var goodletters = new List<char>();
-
-        for (var i = 0; i < usedWords.Length; i++)
-        {
-            for (var j = 0; j < usedWords[i].Length; j++)
-            {
-                if (correctnessOfUsedWords[i][j] == 'G')
-                {
-                    goodletters.Add(usedWords[i][j]);
-                }
-
-                if (correctnessOfUsedWords[i][j] == 'Y')
-                {
-                    correctletters.Add(usedWords[i][j]);
-                }
-            }
-        }
-        return allWordList
-            .Where(word => !usedWords.Contains(word))
-            .Where(word => !word.Any(goodletters.Contains))
-            .Where(word => !word.Any(correctletters.Contains))
-            .ToList();;
-    }
 }
-
