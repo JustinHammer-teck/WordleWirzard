@@ -1,3 +1,6 @@
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using WordGuess.Web.Helper;
+using WordGuess.Web.ViewModels;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
 
 namespace WordGuess.Web.Services;
@@ -12,46 +15,58 @@ public class EliminationWordService
         _hostingEnvironment = hostingEnvironment;
         pathToRoot = Path.Combine(_hostingEnvironment.WebRootPath);
     }
-    public IEnumerable<Tuple<string, int, int>> GetEliminationWord(string[] usedWords,
-        string[] correctnessOfUsedWords,
+
+    public IEnumerable<Tuple<string, int, int>> GetEliminationWord(IEnumerable<UsedWord> usedWords,
         IEnumerable<string> possibleWords,
         IEnumerable<(char, int[])> letterFeq,
         int wordleLevel = 1)
     {
         var result = new List<Tuple<string, int, int>>();
+        var helper = new WordPlacementHelper();
+        var correctWords = new List<Tuple<char, int>>();
 
-        var overallLetterFeq = OverAllLetterFeq(possibleWords, letterFeq);
-        
-        var guessWords= File.ReadAllLines(pathToRoot + "/src/word_guess.txt");
-        
-        var refWord = guessWords.Where(guess =>
+        foreach (var usedWord in usedWords)
         {
-            for (var i = 0; i < usedWords.Length; i++)
-            {
-                for (var j = 0; j < 5; j++)
-                {
-                    return !(correctnessOfUsedWords[i][j] == 'G' && usedWords[i][j] == guess[j]);
-                }
-            }
-
-            return true;
-        });
-
-        var something = refWord;
-        
-        foreach (var word in refWord)
-        {
-            var overallScore = GetOverallScore(word, overallLetterFeq);
-
-            var positionScore = GetPositionalScore(word, letterFeq);
-
-            result.Add(new Tuple<string, int, int>(word, overallScore, positionScore));
+            correctWords.AddRange(helper.CorrectPlacement(usedWord.Correctness, usedWord.Word));
         }
 
-        return result;
+        var usedWordsOnly = usedWords.Select(x => x.Word);
+        var guessWords = File.ReadAllLines(pathToRoot + "/src/level3smashword.txt");
+        var overallLetterFeq = OverAllLetterFeq(possibleWords, letterFeq);
+
+        switch (wordleLevel)
+        {
+            case < 3:
+            {
+                foreach (var word in guessWords
+                             .Where(fw => !usedWordsOnly.Contains(fw))
+                             .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1)))
+                {
+                    var overallScore = GetOverallScore(word, overallLetterFeq);
+
+                    var positionScore = GetPositionalScore(word, letterFeq);
+
+                    result.Add(new Tuple<string, int, int>(word, overallScore, positionScore));
+                }
+
+                break;
+            }
+        }
+
+
+        if (possibleWords.Count() <= 3)
+        {
+            result.Clear();
+        }
+
+        return result
+            .Distinct()
+            .OrderByDescending(x => x.Item2)
+            .ThenByDescending(x => x.Item3);
     }
-    
-    private IEnumerable<Tuple<char, int>> OverAllLetterFeq(IEnumerable<string> possibleWords, IEnumerable<(char, int[])> letterFeq)
+
+    private IEnumerable<Tuple<char, int>> OverAllLetterFeq(IEnumerable<string> possibleWords,
+        IEnumerable<(char, int[])> letterFeq)
     {
         var result = new List<Tuple<char, int>>();
         foreach (var letterScore in letterFeq)
@@ -63,7 +78,6 @@ public class EliminationWordService
 
         return result;
     }
-
     
     private int GetPositionalScore(string word, IEnumerable<(char, int[])> letterFeq)
     {

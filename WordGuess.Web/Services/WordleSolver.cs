@@ -16,8 +16,7 @@ public class WordleSolver
         pathToRoot = Path.Combine(_hostingEnvironment.WebRootPath);
     }
 
-    public WordleWords Handle(string correctness, string guess, IEnumerable<string> possibleWords, int row,
-        string[] usedWords, string[] correctnessOfUsedWords)
+    public WordleWords Handle(string correctness, string guess, IEnumerable<string> possibleWords, int row, IEnumerable<UsedWord> usedWords)
     {
         var eliminationWordService = new EliminationWordService(_hostingEnvironment);
         if (row == 1)
@@ -31,9 +30,8 @@ public class WordleSolver
 
         var guessWordsRef = WordRemover(correctness, guess, possibleWords);
         var eliminationWords = eliminationWordService.GetEliminationWord(
-            usedWords, 
-            correctnessOfUsedWords,
-            possibleWords, 
+            usedWords,
+            guessWordsRef, 
             LetterFeq(guessWordsRef));
         
         var result = new WordleWords()
@@ -43,10 +41,9 @@ public class WordleSolver
                 .OrderBy(x => x.Item2)
                 .Select(x => x.Item1)
                 .ToList(),
-            EliminationWord = eliminationWords.OrderByDescending(x => x.Item2)
-                .ThenByDescending(x => x.Item3)
+            EliminationWord = eliminationWords
                 .Select(x => x.Item1)
-                .First()
+                .FirstOrDefault("")
         };
         return result;
     }

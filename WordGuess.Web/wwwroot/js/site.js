@@ -16,9 +16,10 @@ var wordleWord = {
     GuessWord: "",
     Correctness: [],
     Row: 1,
-    UsedWords: [],
-    CorrectnessOfUsedWords: []
+    UsedWords: []
 }
+
+
 
 function Init() {
     GetStartWord();
@@ -80,7 +81,6 @@ $(".dropdown-item").click(function () {
     }
     wordleWord.PossibleWords = [];
     wordleWord.UsedWords = [];
-    wordleWord.CorrectnessOfUsedWords = [];
     wordleWord.Row = 1;
     $(".word_box-choice").attr("disabled", false);
     $(".word_box-choice").css("background", "");
@@ -176,7 +176,6 @@ function ClearWordCastState() {
 }
 
 function CastingNextWord(castingWord) {
-    wordleWord.UsedWords.push(castingWord)
     let index = 1;
     let row = 1;
     let rowIndex = 0;
@@ -214,10 +213,14 @@ function CastingNextWord(castingWord) {
         UpdateAlphabet(boxStatus, char);
         index++;
     });
+    
     wordleWord.GuessWord = $("#word_cast_wrapper").attr("data-cast-word");
     wordleWord.Correctness = correctness;
-    wordleWord.CorrectnessOfUsedWords.push(correctness.join(""));
-
+    wordleWord.UsedWords.push({
+        Word: castingWord,
+        Correctness: correctness.join("")
+    })
+    
     ProcessGuessWord();
 
     wordleWord.Row = wordleWord.Row + 1;
@@ -228,6 +231,7 @@ function CastingNextWord(castingWord) {
 function ProcessGuessWord() {
     $("#next_word_list").empty();
     $("#elimination_word").empty();
+    console.log(JSON.stringify(wordleWord));
     $.ajax({
         type: 'POST',
         url: baseURl + "/ProcessGuessWord",
