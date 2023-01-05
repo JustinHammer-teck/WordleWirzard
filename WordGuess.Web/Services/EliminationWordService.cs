@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using WordGuess.Web.Helper;
 using WordGuess.Web.ViewModels;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -23,6 +22,7 @@ public class EliminationWordService
     {
         var result = new List<Tuple<string, int, int>>();
         var helper = new WordPlacementHelper();
+        var wordScoreService = new WordScoringService();
         var correctWords = new List<Tuple<char, int>>();
 
         foreach (var usedWord in usedWords)
@@ -32,11 +32,11 @@ public class EliminationWordService
 
         var usedWordsOnly = usedWords.Select(x => x.Word);
         var guessWords = File.ReadAllLines(pathToRoot + "/src/level3smashword.txt");
-        var overallLetterFeq = OverAllLetterFeq(possibleWords, letterFeq);
+        var overallLetterFeq = OverAllLetterFeq(letterFeq);
 
         switch (wordleLevel)
         {
-            case < 3:
+            case 1:
             {
                 foreach (var word in guessWords
                              .Where(fw => !usedWordsOnly.Contains(fw))
@@ -51,8 +51,14 @@ public class EliminationWordService
 
                 break;
             }
+            case 2:
+            {
+                var filtered = RemovePatternRepeatLetters(possibleWords);
+                var letterFeqMagicWand2 = wordScoreService.LetterFeq(filtered);
+                
+                break;
+            }
         }
-
 
         if (possibleWords.Count() <= 3)
         {
@@ -65,7 +71,37 @@ public class EliminationWordService
             .ThenByDescending(x => x.Item3);
     }
 
-    private IEnumerable<Tuple<char, int>> OverAllLetterFeq(IEnumerable<string> possibleWords,
+    private IEnumerable<string> RemovePatternRepeatLetters(IEnumerable<string> possibleWords)
+    {
+        var mostFeqLetterInList = new List<(char, int)>();
+
+        foreach (var word in possibleWords)
+        {
+            mostFeqLetterInList.AddRange(word
+                .Select((c, i) => new { c, i })
+                .Where(letter => possibleWords.All(w => w[letter.i] == letter.c))
+                .Select(x => (x.c, x.i)));
+        }
+
+        var result = new Dictionary<int, string>();
+
+
+        for (var i = 0; i < possibleWords.Count(); i++)
+        {
+            var value = possibleWords.ToList()[i];
+            foreach (var letter in mostFeqLetterInList.Distinct())
+            {
+                var reference = value.ToCharArray();
+                reference[letter.Item2] = '-'; 
+                value = new string(reference);
+            }
+            result.Add(i, value);
+        }
+
+        return result.Select(x => x.Value);
+    }
+
+    private IEnumerable<Tuple<char, int>> OverAllLetterFeq(
         IEnumerable<(char, int[])> letterFeq)
     {
         var result = new List<Tuple<char, int>>();
@@ -78,7 +114,7 @@ public class EliminationWordService
 
         return result;
     }
-    
+
     private int GetPositionalScore(string word, IEnumerable<(char, int[])> letterFeq)
     {
         var positionalScore = 0;

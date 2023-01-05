@@ -19,25 +19,32 @@ public class WordleSolver
     public WordleWords Handle(string correctness, string guess, IEnumerable<string> possibleWords, int row, IEnumerable<UsedWord> usedWords)
     {
         var eliminationWordService = new EliminationWordService(_hostingEnvironment);
+        var wordScoringService = new WordScoringService();
         if (row == 1)
         {
             possibleWords = File.ReadAllLines(pathToRoot + "/src/word_answer.txt");
         }
         else if (!possibleWords.Any() && row > 1)
         {
-            throw new WordleWordsException("No Words to Process");
+            throw new WordleWordsException();
+        }
+        else if (row > 6)
+        {
+            throw new ExceededRowNumberException();
         }
 
         var guessWordsRef = WordRemover(correctness, guess, possibleWords);
+        var letterFeq = wordScoringService.LetterFeq(guessWordsRef);
         var eliminationWords = eliminationWordService.GetEliminationWord(
             usedWords,
             guessWordsRef, 
-            LetterFeq(guessWordsRef));
+            letterFeq,
+            row);
         
         var result = new WordleWords()
         {
-            BestWord = BestWord(guessWordsRef, LetterFeq(guessWordsRef)),
-            PossibleWords = WordScore(guessWordsRef, LetterFeq(guessWordsRef))
+            BestWord = wordScoringService.BestWord(guessWordsRef, letterFeq),
+            PossibleWords = wordScoringService.WordScore(guessWordsRef, letterFeq)
                 .OrderBy(x => x.Item2)
                 .Select(x => x.Item1)
                 .ToList(),
@@ -85,83 +92,5 @@ public class WordleSolver
                     .Where(x => goodLetter.Contains(x))
                     .All(t => word.Count(x => x == t) == goodLetter.Count(x => x == t)))
             .ToArray();
-    }
-
-    private IEnumerable<(string, double)> WordScore(IEnumerable<string> possibleWord,
-        IEnumerable<(char, int[])> letterFeq)
-    {
-        var wordValue = new List<(string, double)>();
-        int[] maxFeq = { 0, 0, 0, 0, 0 };
-        foreach (var c in letterFeq)
-        {
-            for (int i = 0; i < 5; i++)
-            {
-                if (maxFeq[i] < c.Item2[i])
-                {
-                    maxFeq[i] = c.Item2[i];
-                }
-            }
-        }
-
-        foreach (var word in possibleWord)
-        {
-            var worRef = word.ToLower();
-            double score = 1;
-            for (var i = 0; i < 5; i++)
-            {
-                var letter = worRef[i];
-                var index = letterFeq
-                    .ToList()
-                    .Find(x => x.Item1 == letter);
-                score *= 1 + Math.Pow((index.Item2[i] - maxFeq[i]), 2);
-            }
-
-            wordValue.Add((word, score));
-        }
-
-        return wordValue;
-    }
-
-    public string BestWord(string[] possibleWord, IEnumerable<(char, int[])> letterFeq)
-    {
-        double maxScore = 9999999999999999999;
-        var result = "";
-        var score = WordScore(possibleWord, letterFeq);
-
-        foreach (var word in possibleWord)
-        {
-            var index = score.ToList().Find(x => x.Item1 == word);
-            if (index.Item2 < maxScore)
-            {
-                maxScore = index.Item2;
-                result = word;
-            }
-        }
-
-        return result;
-    }
-
-    public IEnumerable<(char, int[])> LetterFeq(IEnumerable<string> possibleWords)
-    {
-        var alphabet = "abcdefghijklmnopqrstuvwxyz";
-        var letterfeq = new List<(char, int[])>();
-        foreach (var c in alphabet)
-        {
-            int[] feq = { 0, 0, 0, 0, 0 };
-            for (int i = 0; i < 5; i++)
-            {
-                foreach (var word in possibleWords)
-                {
-                    if (word[i] == c)
-                    {
-                        feq[i] += 1;
-                    }
-                }
-            }
-
-            letterfeq.Add((c, feq));
-        }
-
-        return letterfeq;
     }
 }

@@ -9,14 +9,11 @@ namespace WordGuess.Web.Controllers;
 
 public class WordleWizardController : Controller
 {
-    private readonly ILogger<WordleWizardController> _logger;
     private readonly IHostingEnvironment _hostingEnvironment;
     private readonly string pathToRoot;
 
-    public WordleWizardController(ILogger<WordleWizardController> logger,
-        IHostingEnvironment hostingEnvironment)
+    public WordleWizardController(IHostingEnvironment hostingEnvironment)
     {
-        _logger = logger;
         _hostingEnvironment = hostingEnvironment;
         pathToRoot = Path.Combine(_hostingEnvironment.WebRootPath);
     }
@@ -53,12 +50,12 @@ public class WordleWizardController : Controller
     {
         var startwords = System.IO.File.ReadAllText(pathToRoot + "/src/start_word.txt");
         var startwordList = startwords.Split('\n');
-        var wordle = new WordleSolver(_hostingEnvironment);
+        var wordScoringService = new WordScoringService();
 
         return Json(new WordleStartWords()
         {
             StartWords = startwordList,
-            BestWord = wordle.BestWord(startwordList, wordle.LetterFeq(startwordList))
+            BestWord = wordScoringService.BestWord(startwordList, wordScoringService.LetterFeq(startwordList))
         });
     }
 
