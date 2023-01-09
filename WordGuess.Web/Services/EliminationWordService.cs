@@ -53,9 +53,14 @@ public class EliminationWordService
             }
             case 2:
             {
+                if (possibleWords.Count() < 15)
+                {
+                    guessWords = File.ReadAllLines(pathToRoot + "/src/level2smashword.txt");
+                }
                 var filtered = RemovePatternRepeatLetters(possibleWords);
                 var letterFeqMagicWand2 = wordScoreService.LetterFeq(filtered);
                 var overallLetterFeqMagicWand2 = OverAllLetterFeq(letterFeqMagicWand2);
+                
                 foreach (var word in guessWords
                              .Where(fw => !usedWordsOnly.Contains(fw))
                              .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1)))
@@ -86,10 +91,13 @@ public class EliminationWordService
 
         foreach (var word in possibleWords)
         {
-            mostFeqLetterInList.AddRange(word
-                    .Select((c, i) => new { c, i })
-                    .Where(letter => possibleWords.All(w => w[letter.i] == letter.c))
-                    .Select(x => (x.c, x.i)))
+            foreach (var letter in word.Select((c, i) => new { c, i }))
+            {
+                if (possibleWords.All(w => w[letter.i] == letter.c))
+                {
+                    mostFeqLetterInList.Add((letter.c, letter.i));
+                }
+            }
         }
 
         var result = new Dictionary<int, string>();
@@ -150,7 +158,7 @@ public class EliminationWordService
         var overallScore = 0;
         foreach (var letter in overallLetterFeq)
             for (var i = 0; i < 5; i++)
-            {
+            {   
                 if (word[i] == letter.Item1)
                     overallScore += letter.Item2;
 
