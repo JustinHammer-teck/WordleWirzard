@@ -9,14 +9,11 @@ namespace WordGuess.Web.Controllers;
 
 public class WordleWizardController : Controller
 {
-    private readonly ILogger<WordleWizardController> _logger;
     private readonly IHostingEnvironment _hostingEnvironment;
     private readonly string pathToRoot;
 
-    public WordleWizardController(ILogger<WordleWizardController> logger,
-        IHostingEnvironment hostingEnvironment)
+    public WordleWizardController(IHostingEnvironment hostingEnvironment)
     {
-        _logger = logger;
         _hostingEnvironment = hostingEnvironment;
         pathToRoot = Path.Combine(_hostingEnvironment.WebRootPath);
     }
@@ -32,6 +29,7 @@ public class WordleWizardController : Controller
     }
     
     [HttpPost]
+    [RequestSizeLimit(100_000_000)]
     public IActionResult ProcessGuessWord([FromForm] WordleWordView wordleWord)
     {
         if (wordleWord == null) return Error();
@@ -43,8 +41,7 @@ public class WordleWizardController : Controller
             wordleWord.GuessWord.ToLower(),
             wordleWord.PossibleWords,
             wordleWord.Row,
-            wordleWord.UsedWords,
-            wordleWord.CorrectnessOfUsedWords);
+            wordleWord.UsedWords);
         return Ok(new { data = result});
     }
 
@@ -53,12 +50,12 @@ public class WordleWizardController : Controller
     {
         var startwords = System.IO.File.ReadAllText(pathToRoot + "/src/start_word.txt");
         var startwordList = startwords.Split('\n');
-        var wordle = new WordleSolver(_hostingEnvironment);
+        var wordScoringService = new WordScoringService();
 
         return Json(new WordleStartWords()
         {
             StartWords = startwordList,
-            BestWord = wordle.BestWord(startwordList, wordle.LetterFeq(startwordList))
+            BestWord = wordScoringService.BestWord(startwordList, wordScoringService.LetterFeq(startwordList))
         });
     }
 

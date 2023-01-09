@@ -6,17 +6,17 @@
     char[] alphabetRow3 = { 'Z', 'X', 'C', 'V', 'B', 'N', 'M' };
 }
 
-<div id="game_container" class="container card mt-5 mx-auto">
-    <div id="wizard-logo"></div>
+<div id="game_container" class="container-fluid p-0 card my-3 mx-auto">
+    <div id="wizard_logo"></div>
     <div id="game_wrapper" class="card-body">
         <div class="d-flex flex-row-reverse my-3">
-            <div class="row col-10 pe-3" style="width: 70%">
+            <div class="row col-xl-9 col-9 pe-3">
                 <div class="d-inline-flex w-100">
                     <img id="game_title-icon" src="@Url.Content("~/assets/Vector.svg")" alt="help-icon">
                     <h5 id="game_title">Wordle Whiz</h5>
                     <a class="my-auto ms-auto text-warning" asp-action="Index">HELP!</a>
                 </div>
-                <div class="card">
+                <div class="card p-0">
                     <div class="card-body">
                         <div class="d-inline-flex">
                             <h6 class="game_title ps-3 pe-1">
@@ -24,25 +24,23 @@
                             </h6>
                             <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
                         </div>
-                        <div id="word_cast_wrapper" class="col-7 d-flex flex-row px-3" data-cast-word="">
+                        <div id="word_cast_wrapper" class="d-flex justify-content-center flex-row" data-cast-word="">
                             @for (int i = 1; i < 6; i++)
                             {
                                 <div id="word_cast_box_id_@i" class="word_cast_box word_box position-relative word_cast_box-choice" data-char="" data-clickregisted="3">
                                     <span id="word_cast-@i" class="word_cast position-absolute top-50 start-50 translate-middle game_word"></span>
                                 </div>
                             }
-                            <div class="mx-2">
-                                <button id="cast_btn" class="game_btn btn-lg btn-success">
-                                    Cast
-                                </button>
-                            </div>
+                            <button id="cast_btn" class="game_btn btn-lg btn-success">
+                                Cast
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row m-1">
-            <div class="col-5 p-0 d-flex flex-column">
+            <div class="col-xxxl-4 col-sm-3 p-0 d-flex flex-column">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-inline-flex">
@@ -55,7 +53,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card my-3 flex">
+                <div class="card mt-3 flex">
                     <div class="card-body">
                         <div class="d-inline-flex w-100">
                             <h6 class="game_title pe-1">
@@ -68,8 +66,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-7 p-0">
-                <div id="wordle-guess-box" class="card">
+            <div class="col-xxxl-8 col-sm-9 p-0">
+                <div id="wordle-guess-box" class="card h-100">
                     <div class="card-body">
                         <div class="d-flex">
                             <div class="d-inline-flex w-100">
@@ -101,7 +99,7 @@
                                         string guessWordIdName = "guess_word_" + j + "_row_" + i;
                                         string guessBoxIdName = "guess_box_id_" + j + "_row_" + i;
 
-                                        <div id="@guessBoxIdName" class="word_box position-relative word_guess_box">
+                                        <div id="@guessBoxIdName" class="word_box word_box-guess position-relative word_guess_box">
                                             <span id="@guessWordIdName" class="position-absolute top-50 start-50 translate-middle game_word"></span>
                                         </div>
                                     }
@@ -113,7 +111,7 @@
             </div>
         </div>
         <div class="row m-1 my-3">
-            <div class="card ml-2 col-12">
+            <div class="card p-0 ml-2 col-12">
                 <div class="card-body">
                     <div class="d-inline-flex w-100">
                         <h6 class="game_title pe-1">

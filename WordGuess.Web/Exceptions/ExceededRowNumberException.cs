@@ -2,8 +2,7 @@
 
 public class ExceededRowNumberException : Exception
 {
-    public ExceededRowNumberException(string message): base(message)
+    public ExceededRowNumberException() : base("Exceeded Row")
     {
-        
     }
 }
