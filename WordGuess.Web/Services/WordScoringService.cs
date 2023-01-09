@@ -63,9 +63,10 @@ public class WordScoringService
         foreach (var c in alphabet)
         {
             int[] feq = { 0, 0, 0, 0, 0 };
-            for (int i = 0; i < 5; i++)
+
+            foreach (var word in possibleWords)
             {
-                foreach (var word in possibleWords)
+                for (int i = 0; i < word.Length; i++)
                 {
                     if (word[i] == c)
                     {
@@ -73,7 +74,6 @@ public class WordScoringService
                     }
                 }
             }
-
             letterfeq.Add((c, feq));
         }
 
