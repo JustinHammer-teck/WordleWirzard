@@ -32,12 +32,12 @@ public class EliminationWordService
 
         var usedWordsOnly = usedWords.Select(x => x.Word);
         var guessWords = File.ReadAllLines(pathToRoot + "/src/level3smashword.txt");
-        var overallLetterFeq = OverAllLetterFeq(letterFeq);
 
         switch (wordleLevel)
         {
             case 1:
             {
+                var overallLetterFeq = OverAllLetterFeq(letterFeq);
                 foreach (var word in guessWords
                              .Where(fw => !usedWordsOnly.Contains(fw))
                              .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1)))
@@ -55,6 +55,15 @@ public class EliminationWordService
             {
                 var filtered = RemovePatternRepeatLetters(possibleWords);
                 var letterFeqMagicWand2 = wordScoreService.LetterFeq(filtered);
+                var overallLetterFeqMagicWand2 = OverAllLetterFeq(letterFeqMagicWand2);
+                foreach (var word in guessWords
+                             .Where(fw => !usedWordsOnly.Contains(fw))
+                             .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1)))
+                {
+                    var overallScore = GetOverallScoreSmashWord2(word, overallLetterFeqMagicWand2, possibleWords.Count());
+
+                    result.Add(new Tuple<string, int, int>(word, overallScore, 0));
+                }
                 
                 break;
             }
@@ -70,7 +79,7 @@ public class EliminationWordService
             .OrderByDescending(x => x.Item2)
             .ThenByDescending(x => x.Item3);
     }
-
+    
     private IEnumerable<string> RemovePatternRepeatLetters(IEnumerable<string> possibleWords)
     {
         var mostFeqLetterInList = new List<(char, int)>();
@@ -78,13 +87,12 @@ public class EliminationWordService
         foreach (var word in possibleWords)
         {
             mostFeqLetterInList.AddRange(word
-                .Select((c, i) => new { c, i })
-                .Where(letter => possibleWords.All(w => w[letter.i] == letter.c))
-                .Select(x => (x.c, x.i)));
+                    .Select((c, i) => new { c, i })
+                    .Where(letter => possibleWords.All(w => w[letter.i] == letter.c))
+                    .Select(x => (x.c, x.i)))
         }
 
         var result = new Dictionary<int, string>();
-
 
         for (var i = 0; i < possibleWords.Count(); i++)
         {
@@ -133,6 +141,22 @@ public class EliminationWordService
             for (var i = 0; i < 5; i++)
                 if (word[i] == letter.Item1)
                     overallScore += letter.Item2;
+
+        return overallScore;
+    }
+    
+    private int GetOverallScoreSmashWord2(string word, IEnumerable<Tuple<char, int>> overallLetterFeq, int possibleWordCount)
+    {
+        var overallScore = 0;
+        foreach (var letter in overallLetterFeq)
+            for (var i = 0; i < 5; i++)
+            {
+                if (word[i] == letter.Item1)
+                    overallScore += letter.Item2;
+
+                if (word[i] == letter.Item1 && letter.Item2 > possibleWordCount)
+                    overallScore = (int)(possibleWordCount * 0.3);
+            }
 
         return overallScore;
     }
