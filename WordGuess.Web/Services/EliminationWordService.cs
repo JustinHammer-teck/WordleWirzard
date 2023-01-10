@@ -17,8 +17,7 @@ public class EliminationWordService
 
     public IEnumerable<Tuple<string, int, int>> GetEliminationWord(IEnumerable<UsedWord> usedWords,
         IEnumerable<string> possibleWords,
-        IEnumerable<(char, int[])> letterFeq,
-        int wordleLevel = 1)
+        IEnumerable<(char, int[])> letterFeq)
     {
         var result = new List<Tuple<string, int, int>>();
         var helper = new WordPlacementHelper();
@@ -65,16 +64,25 @@ public class EliminationWordService
         var filteredRepeatLetter = RemoveRepeatLetters(filtered);
         var letterFeq = wordScoreService.LetterFeq(filteredRepeatLetter);
         var overallLetterFeq = OverAllLetterFeq(letterFeq);
+
+        // result.AddRange(guessWords
+        //     .Where(fw => !usedWordsOnly.Contains(fw))
+        //     .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1))
+        //     .Select(word => new Tuple<string, int, int>(word,
+        //         GetOverallScoreSmashWord3(word, overallLetterFeq, possibleWords.Count(),
+        //             possibleWords.Sum(x => x.Length)), 0)));
+
         foreach (var word in guessWords
                      .Where(fw => !usedWordsOnly.Contains(fw))
                      .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1)))
         {
-            var overallScore = GetOverallScoreSmashWord2(word, overallLetterFeq, possibleWords.Count());
+            var overallScore = GetOverallScoreSmashWord3(word, overallLetterFeq, possibleWords.Count(),
+                possibleWords.Sum(x => x.Length));
 
             result.Add(new Tuple<string, int, int>(word, overallScore, 0));
         }
     }
-    
+
     private void GetSmashWordLevel2(IEnumerable<string> possibleWords, string[] guessWords, WordScoringService wordScoreService,
         IEnumerable<string> usedWordsOnly, List<Tuple<char, int>> correctWords, List<Tuple<string, int, int>> result)
     {
@@ -193,4 +201,45 @@ public class EliminationWordService
             }
         return overallScore;
     }
+
+    public static int GetOverallScoreSmashWord3(string word, IEnumerable<Tuple<char, int>> overallLetterFeq, int possibleWordCount, int totalWordCount)
+    {
+        var overallScore = 0;
+        var theLetterScore = 0.0;
+        foreach (var c in word)
+        {       
+            foreach (var letter in overallLetterFeq)
+            {
+                if (c == letter.Item1)
+                {
+                    theLetterScore += (double) letter.Item2 / totalWordCount ;
+                }
+            }
+            if (theLetterScore >= 0.75 * possibleWordCount)
+            {
+                theLetterScore = 2;
+            }
+            else if (theLetterScore >= 0.5 * possibleWordCount && theLetterScore < 0.75 * possibleWordCount)
+            {
+                theLetterScore = 5;
+            }
+            else if (theLetterScore >= 0.375 * possibleWordCount && theLetterScore < 0.5 * possibleWordCount)
+            {
+                theLetterScore = 7;
+            }
+            else if (theLetterScore >= 0.25 * possibleWordCount && theLetterScore < 0.375 * possibleWordCount)
+            {
+                theLetterScore = 6;
+            }
+            else if (theLetterScore > 0 * possibleWordCount && theLetterScore < 0.25 * possibleWordCount)
+            {
+                theLetterScore = 5;
+            }
+
+            overallScore += (int) theLetterScore;
+        }
+
+        return overallScore;
+    }
+
 }

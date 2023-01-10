@@ -38,8 +38,7 @@ public class WordleSolver
         var eliminationWords = eliminationWordService.GetEliminationWord(
             usedWords,
             guessWordsRef, 
-            letterFeq,
-            row);
+            letterFeq);
         
         var result = new WordleWords()
         {
