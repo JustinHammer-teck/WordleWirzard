@@ -1396,7 +1396,7 @@ thali
 lathi
 tragi
 marls
-false*
+false
 feals
 fleas
 leafs
