@@ -1,11 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordGuess.Web", "WordGuess.Web\WordGuess.Web.csproj", "{BD553FD4-0DC0-4C38-965F-F427B66FC6FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordGuess.Web", "WordGuess.Web/WordGuess.Web.csproj", "{BD553FD4-0DC0-4C38-965F-F427B66FC6FE}"
+EndProject
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Release|Any CPU = Release|Any CPUWordGuess.Web
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BD553FD4-0DC0-4C38-965F-F427B66FC6FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
