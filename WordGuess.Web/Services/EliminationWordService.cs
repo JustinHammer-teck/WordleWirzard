@@ -197,7 +197,7 @@ public class EliminationWordService
                 if (t == letter.Item1)
                     overallScore += letter.Item2;
                 else if (t == letter.Item1 && letter.Item2 > possibleWordCount)
-                    overallScore = (int)(possibleWordCount * 0.3);
+                    overallScore += (int)(possibleWordCount * 0.3);
             }
         return overallScore;
     }
