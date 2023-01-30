@@ -44,7 +44,6 @@ public class WordleSolver
         {
             BestWord = wordScoringService.BestWord(guessWordsRef, letterFeq),
             PossibleWords = wordScoringService.WordScore(guessWordsRef, letterFeq)
-                .OrderBy(x => x.Item2)
                 .Select(x => x.Item1)
                 .ToList(),
             EliminationWord = eliminationWords
