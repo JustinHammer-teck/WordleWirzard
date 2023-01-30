@@ -14,15 +14,6 @@
     }
 }
 
-@media (min-width: 768px) {
-
-}
-
-@media (min-width: 992px) {  }
-
-@media (min-width: 1200px) {
-}
-
 @media (min-width: 1650px) {
     .col-xxxl-4{
         flex:0 0 auto;width:33.33333333% !important;
@@ -39,22 +30,21 @@
     }
 }
 
-h6 {
-    font-family: SfProText, sans-serif;
-}
-
 span {
     font-family: PressStart2P, sans-serif;
-}
-
-.card-body {
-    padding: 1rem 0.5rem;
 }
 
 html {
     position: relative;
     min-height: 100%;
+}
 
+.card-body {
+    border: none;
+    border-radius: .5rem;
+    padding: 0.5rem !important;
+    background: url('../assets/Rectangle.png'), radial-gradient(94.78% 143.27% at 50% 12.88%, rgba(29, 94, 192, 1) 13.96%, rgba(2, 12, 27, 1) 100%);
+    background-size: cover !important;
 }
 
 body {
@@ -66,7 +56,7 @@ body {
 }
 
 h6 {
-    font-family: serif;
+    font-family: SfProText, sans-serif;
     font-weight: bold;
 }
 
@@ -87,7 +77,6 @@ h6 {
 #next_word_list {
     height: 315px;
     overflow-y: scroll;
-    direction: rtl;
     scrollbar-color: #ffc107 rgba(0, 0, 0, 0.09);
 }
 
@@ -207,14 +196,6 @@ h6 {
 
 #game_wrapper {
     background: url('../assets/Rectangle.png'), radial-gradient(118.58% 72.31% at 33.26% 24.47%, #0F3671 13.96%, #020C1B 81.75%);
-}
-
-.card-body {
-    background-size: cover !important;
-    border: none;
-    border-radius: .5rem;
-    padding: 0.5rem !important;
-    background: url('../assets/Rectangle.png'), radial-gradient(94.78% 143.27% at 50% 12.88%, rgba(29, 94, 192, 1) 13.96%, rgba(2, 12, 27, 1) 100%);
 }
 
 .sm-badge {
