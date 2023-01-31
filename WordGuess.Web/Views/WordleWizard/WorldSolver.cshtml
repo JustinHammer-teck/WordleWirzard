@@ -22,7 +22,9 @@
                             <h6 class="game_title ps-3 pe-1">
                                 NEXT WORD TO PLAY
                             </h6>
-                            <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                            <a style="cursor: help" href="/">
+                                <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                            </a>
                         </div>
                         <div id="word_cast_wrapper" class="d-flex justify-content-center flex-row" data-cast-word="">
                             @for (int i = 1; i < 6; i++)
@@ -47,7 +49,9 @@
                             <h6 class="game_title pe-1">
                                 MAGIC WAND
                             </h6>
-                            <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                            <a style="cursor: help" href="/">
+                                <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                            </a>
                         </div>
                         <div id="elimination_word" class="word_list_container">
                         </div>
@@ -59,7 +63,9 @@
                             <h6 class="game_title pe-1">
                                 MAGIC WORD LIST
                             </h6>
-                            <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                            <a style="cursor: help" href="/">
+                                <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                            </a>
                         </div>
                         <div id="next_word_list" class="word_list_container">
                         </div>
@@ -74,7 +80,9 @@
                                 <h6 class="game_title pe-1">
                                     WORDLE GUESS
                                 </h6>
-                                <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                                <a style="cursor: help" href="/">
+                                    <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                                </a>
                             </div>
                             <div class="dropdown">
                                 <a class="dropdown-toggle dropdown-btn text-warning game_title" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
@@ -82,10 +90,10 @@
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                                     <li>
-                                        <a class="dropdown-item" data-value="1" href="#">CLEAR FIRST ROW</a>
+                                        <a class="dropdown-item clear-row" data-value="1" href="#">CLEAR FIRST ROW</a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" data-value="2" href="#">CLEAR ALL</a>
+                                        <a class="dropdown-item clear-row" data-value="2" href="#">CLEAR ALL</a>
                                     </li>
                                 </ul>
                             </div>
@@ -117,7 +125,9 @@
                         <h6 class="game_title pe-1">
                             ALPHABET
                         </h6>
-                        <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                        <a style="cursor: help" href="/">
+                            <img src="@Url.Content("~/assets/outline.svg")" alt="help-icon" style="margin-bottom: 5px;">
+                        </a>
                     </div>
                     <div id="alphabetRow1" class="d-flex flex-row justify-content-center">
                         @foreach (var c in alphabetRow1)

@@ -22,6 +22,7 @@ function Init() {
     GetStartWord();
     UpdateContextBoxColor(3, $(".word_cast_box"));
     Keyboard();
+    localStorage.clear();
 }
 
 Init();
@@ -44,50 +45,99 @@ function GetStartWord() {
     });
 }
 
-$(".dropdown-item").click(function () {
+function ClearAll() {
     let rowUpdate = 1;
     let index = 1;
-    let value = $(this).attr("data-value");
 
-    if (value == 1) {
-        if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
-            let text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
-            $.each(Array.from(text), function (index, char) {
-                UpdateAlphabet(3, char);
-            });
-            $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
-            $.each($("#word_guess_row_" + rowUpdate).children(), function () {
-                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background", "rgba(0, 0, 0, 0)");
-                $("#guess_word_" + index + "_row_" + rowUpdate).text("");
-                wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == rowUpdate ? true : false;
-                index++;
-            });
-        }
-    } else if (value == 2) {
-        $.each($(".word_guess_row"), function () {
-            $.each($("#word_guess_row_" + rowUpdate).children(), function () {
-                $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background", "rgba(0, 0, 0, 0)");
-                $("#guess_word_" + index + "_row_" + rowUpdate).text("");
-                wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
-                index++;
-            });
-            $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
-            rowUpdate++;
-            index = 1;
+    $.each($(".word_guess_row"), function () {
+        $.each($("#word_guess_row_" + rowUpdate).children(), function () {
+            $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background", "rgba(0, 0, 0, 0)");
+            $("#guess_word_" + index + "_row_" + rowUpdate).text("");
+            wordGuessRowState[index - 1].state = wordGuessRowState[index - 1].row == 1 ? true : false;
+            index++;
+        });
+        $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
+        rowUpdate++;
+        index = 1;
+    });
+}
+
+function ClearFirstRow() {
+    let rowUpdate = wordGuessRowState.find(x => x.state == true).row - 1;
+    let index = 1;
+
+
+    let lastPossibleWord = localStorage.getItem("lastPossibleWord");
+
+    wordleWord.PossibleWords = lastPossibleWord.split(",");
+    wordleWord.UsedWords.pop();
+    wordleWord.Row = wordleWord.Row - 1;
+    wordleWord.Correctness = [];
+
+    if (lastPossibleWord == "") {
+        GetStartWord();
+    } else {
+        let $wordList = $("#next_word_list");
+        $wordList.empty();
+        $.each(lastPossibleWord.split(","), (key, value) => {
+            $wordList.append("<span class=\"word_list_item \" data-word=\"" + value + "\" onclick='PopulateCastWord(\"" + value + "\")'>" + value.toUpperCase() + "</span>");
         });
     }
+    
+    let lastEliminationWord = localStorage.getItem("lastEliminationWord");
+    $("#elimination_word").empty();
+    $("#elimination_word").append("<span class=\"word_list_item \" data-word=\"" + lastEliminationWord + "\" onclick='PopulateCastWord(\"" + lastEliminationWord + "\")'>" + lastEliminationWord.toUpperCase() + "</span>");
+
+    if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
+        let text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
+        $.each(Array.from(text), function (index, char) {
+            UpdateAlphabet(3, char);
+        });
+        $("#word_guess_row_" + rowUpdate).attr("data-rowtext", "");
+        $.each($("#word_guess_row_" + rowUpdate).children(), function () {
+            $("#guess_box_id_" + index + "_row_" + rowUpdate).css("background", "rgba(0, 0, 0, 0)");
+            $("#guess_word_" + index + "_row_" + rowUpdate).text("");
+            wordGuessRowState[index].state = wordGuessRowState[index].row == wordleWord.Row;
+            index++;
+        });
+    }
+
+    $(".word_box-choice").attr("disabled", false);
+    $(".word_box-choice").css("background", "");
+    ReRenderAlphaChoice();
+}
+
+function ReRenderAlphaChoice(){
+    console.log("Doing something");
+}
+
+$(".clear-row").click(function () {
+    let value = $(this).attr("data-value");
+    if (wordleWord.Row == 1) return;
+    if (value == 1) {
+        ClearFirstRow();
+    } else if (value == 2) {
+        console.log("CLEAR ALL");
+        ClearAll();
+        ClearStage();
+        GetStartWord();
+        localStorage.clear();
+    }
+});
+
+function ClearStage() {
+    ClearWordCastState();
+    $("#elimination_word").empty();
     wordleWord.PossibleWords = [];
     wordleWord.UsedWords = [];
     wordleWord.Row = 1;
     $(".word_box-choice").attr("disabled", false);
     $(".word_box-choice").css("background", "");
-    GetStartWord();
-
-});
+}
 
 function PopulateCastWord(word) {
+    ClearWordCastState();
     $("#word_cast_wrapper").attr("data-cast-word", word);
-
     UpdateWordCastWrapper(word);
     guessWordBoxIndex = 6;
 }
@@ -173,6 +223,7 @@ function ClearWordCastState() {
 }
 
 function CastingNextWord(castingWord) {
+    console.log(wordleWord.Row);
     let index = 1;
     let row = 1;
     let rowIndex = 0;
@@ -210,6 +261,9 @@ function CastingNextWord(castingWord) {
         UpdateAlphabet(boxStatus, char);
         index++;
     });
+    localStorage.setItem("lastPossibleWord", wordleWord.PossibleWords);
+    let eliminationWord = $("#elimination_word").find('span').attr("data-word");
+    localStorage.setItem("lastEliminationWord", eliminationWord == undefined ? "" : eliminationWord);
 
     wordleWord.GuessWord = $("#word_cast_wrapper").attr("data-cast-word");
     wordleWord.Correctness = correctness;
@@ -223,6 +277,7 @@ function CastingNextWord(castingWord) {
     wordleWord.Row = wordleWord.Row + 1;
     wordGuessRowState[rowIndex].state = false;
     wordGuessRowState[rowIndex + 1].state = true;
+    console.log(wordGuessRowState);
 }
 
 function ProcessGuessWord() {
@@ -306,13 +361,9 @@ function Keyboard() {
     window.addEventListener("keyup", function (event) {
         if (event.defaultPrevented) {
             return; // Do nothing if the event was already processed
-        }
-
-        if (event.key === "Backspace") {
+        } else if (event.key === "Backspace") {
             WordDelete();
-        }
-
-        if (isAlphaKey(event) && event.key !== "Backspace") {
+        } else if (isAlphaKey(event) && event.code !== "Tab") {
             WordInput(event.key);
         }
 
