@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using WordGuess.Web.Helper;
 using WordGuess.Web.ViewModels;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
@@ -15,10 +16,17 @@ public class EliminationWordService
         pathToRoot = Path.Combine(_hostingEnvironment.WebRootPath);
     }
 
-    public IEnumerable<Tuple<string, int, int>> GetEliminationWord(IEnumerable<UsedWord> usedWords,
+    public string GetEliminationWord(IEnumerable<UsedWord> usedWords,
         IEnumerable<string> possibleWords,
-        IEnumerable<(char, int[])> letterFeq)
+        IEnumerable<(char, int[])> letterFeq,
+        string wordleStagePattern)
     {
+        var forceSmashWord = GetForceSmashWord(wordleStagePattern);
+        if (!string.IsNullOrWhiteSpace(forceSmashWord))
+        {
+            return forceSmashWord;
+        }
+
         var result = new List<Tuple<string, int, int>>();
         var helper = new WordPlacementHelper();
         var wordScoreService = new WordScoringService();
@@ -44,7 +52,7 @@ public class EliminationWordService
                 GetSmashWordLevel3(possibleWords, guessWords, wordScoreService, usedWordsOnly, correctWords, result);
                 break;
         }
-       
+
         if (possibleWords.Count() < 3)
         {
             result.Clear();
@@ -53,7 +61,9 @@ public class EliminationWordService
         return result
             .Distinct()
             .OrderByDescending(x => x.Item2)
-            .ThenByDescending(x => x.Item3);   
+            .ThenByDescending(x => x.Item3)
+            .Select(x => x.Item1)
+            .FirstOrDefault("");
     }
 
     private void GetSmashWordLevel3(IEnumerable<string> possibleWords, string[] guessWords,
@@ -83,7 +93,8 @@ public class EliminationWordService
         }
     }
 
-    private void GetSmashWordLevel2(IEnumerable<string> possibleWords, string[] guessWords, WordScoringService wordScoreService,
+    private void GetSmashWordLevel2(IEnumerable<string> possibleWords, string[] guessWords,
+        WordScoringService wordScoreService,
         IEnumerable<string> usedWordsOnly, List<Tuple<char, int>> correctWords, List<Tuple<string, int, int>> result)
     {
         if (possibleWords.Count() < 15)
@@ -105,7 +116,8 @@ public class EliminationWordService
         }
     }
 
-    private static void GetSmashWordLevel1(IEnumerable<(char, int[])> letterFeq, string[] guessWords, IEnumerable<string> usedWordsOnly,
+    private static void GetSmashWordLevel1(IEnumerable<(char, int[])> letterFeq, string[] guessWords,
+        IEnumerable<string> usedWordsOnly,
         List<Tuple<char, int>> correctWords, List<Tuple<string, int, int>> result)
     {
         var overallLetterFeq = OverAllLetterFeq(letterFeq);
@@ -126,9 +138,9 @@ public class EliminationWordService
         var mostFeqLetterInList = new List<(char, int)>();
 
         foreach (var word in possibleWords)
-            foreach (var letter in word.Select((c, i) => new { c, i }))
-                if (possibleWords.All(w => w[letter.i] == letter.c))
-                    mostFeqLetterInList.Add((letter.c, letter.i));
+        foreach (var letter in word.Select((c, i) => new { c, i }))
+            if (possibleWords.All(w => w[letter.i] == letter.c))
+                mostFeqLetterInList.Add((letter.c, letter.i));
 
         var result = new Dictionary<int, string>();
 
@@ -138,9 +150,10 @@ public class EliminationWordService
             foreach (var letter in mostFeqLetterInList.Distinct())
             {
                 var reference = value.ToCharArray();
-                reference[letter.Item2] = '-'; 
+                reference[letter.Item2] = '-';
                 value = new string(reference);
             }
+
             result.Add(i, value);
         }
 
@@ -187,34 +200,38 @@ public class EliminationWordService
                 .Where(t => t == letter.Item1)
                 .Sum(t => letter.Item2));
     }
-    
-    private static int GetOverallScoreSmashWord2(string word, IEnumerable<Tuple<char, int>> overallLetterFeq, int possibleWordCount)
+
+    private static int GetOverallScoreSmashWord2(string word, IEnumerable<Tuple<char, int>> overallLetterFeq,
+        int possibleWordCount)
     {
         var overallScore = 0;
         foreach (var letter in overallLetterFeq)
-            foreach (var t in word)
-            {
-                if (t == letter.Item1)
-                    overallScore += letter.Item2;
-                else if (t == letter.Item1 && letter.Item2 > possibleWordCount)
-                    overallScore = (int)(possibleWordCount * 0.3);
-            }
+        foreach (var t in word)
+        {
+            if (t == letter.Item1)
+                overallScore += letter.Item2;
+            else if (t == letter.Item1 && letter.Item2 > possibleWordCount)
+                overallScore = (int)(possibleWordCount * 0.3);
+        }
+
         return overallScore;
     }
 
-    public static int GetOverallScoreSmashWord3(string word, IEnumerable<Tuple<char, int>> overallLetterFeq, int possibleWordCount, int totalWordCount)
+    public static int GetOverallScoreSmashWord3(string word, IEnumerable<Tuple<char, int>> overallLetterFeq,
+        int possibleWordCount, int totalWordCount)
     {
         var overallScore = 0;
         var theLetterScore = 0.0;
         foreach (var c in word)
-        {       
+        {
             foreach (var letter in overallLetterFeq)
             {
                 if (c == letter.Item1)
                 {
-                    theLetterScore += (double) letter.Item2 / totalWordCount ;
+                    theLetterScore += (double)letter.Item2 / totalWordCount;
                 }
             }
+
             if (theLetterScore >= 0.75 * possibleWordCount)
             {
                 theLetterScore = 2;
@@ -236,10 +253,23 @@ public class EliminationWordService
                 theLetterScore = 5;
             }
 
-            overallScore += (int) theLetterScore;
+            overallScore += (int)theLetterScore;
         }
 
         return overallScore;
     }
 
+    private string GetForceSmashWord(string wordleStagePattern)
+    {
+        var guessWords = File.ReadAllLines(pathToRoot + "/src/force_smashword.txt");
+        foreach (var word in guessWords)
+        {
+            var reference = word.Split(',');
+            if (reference[0] == Regex.Replace(wordleStagePattern, "[~]", string.Empty))
+            {
+                return reference[1];
+            }
+        }
+        return string.Empty;
+    }
 }

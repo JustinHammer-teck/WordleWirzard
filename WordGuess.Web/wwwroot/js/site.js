@@ -16,9 +16,9 @@ var wordleWord = {
     GuessWord: "",
     Correctness: [],
     Row: 1,
-    UsedWords: []
+    UsedWords: [],
+    WordleStagePattern: ""
 }
-
 
 
 function Init() {
@@ -213,14 +213,15 @@ function CastingNextWord(castingWord) {
         UpdateAlphabet(boxStatus, char);
         index++;
     });
-    
+
     wordleWord.GuessWord = $("#word_cast_wrapper").attr("data-cast-word");
     wordleWord.Correctness = correctness;
     wordleWord.UsedWords.push({
         Word: castingWord,
         Correctness: correctness.join("")
     })
-    
+
+    wordleWord.WordleStagePattern = SetStagePattern();
     ProcessGuessWord();
 
     wordleWord.Row = wordleWord.Row + 1;
@@ -231,7 +232,6 @@ function CastingNextWord(castingWord) {
 function ProcessGuessWord() {
     $("#next_word_list").empty();
     $("#elimination_word").empty();
-    console.log(JSON.stringify(wordleWord));
     $.ajax({
         type: 'POST',
         url: baseURl + "/ProcessGuessWord",
@@ -326,6 +326,28 @@ function Keyboard() {
     }, true);
 }
 
+function SetStagePattern() {
+    let result = [];
+    let correctplc = ["~","~","~","~","~"];
+    let wrongplc = ["~","~","~","~","~"];
+    if (wordleWord.UsedWords !== null) {
+        wordleWord.UsedWords.forEach((item, index) => {
+            for (let i = 0; i < 5; i++) {
+                if (item.Correctness[i] == 'B') {
+                    result.push(item.Word[i]);
+                } else if (item.Correctness[i] == 'Y') {
+                    wrongplc[i] += item.Word[i];
+                } else if (item.Correctness[i] == 'G') {
+                    correctplc[i] += item.Word[i];
+                }
+            }
+        });
+    }
+    result.unshift(correctplc.join("-") + "-");
+    result.unshift(wrongplc.join("*") + "*");
+    return result.join("").toUpperCase();
+}
+ 
     
 
 
