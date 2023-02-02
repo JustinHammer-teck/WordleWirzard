@@ -204,41 +204,45 @@ public class EliminationWordService
         {
             theLetterScore += overallLetterFeq
                 .Where(letter => c == letter.Item1)
-                .Sum(letter => (double)letter.Item2 / totalWordCount);
-
-            if (theLetterScore > possibleWordCount)
-            {
-                theLetterScore = 2;
-            }
-            if (theLetterScore >= 0.75 * possibleWordCount && theLetterScore < possibleWordCount)
-            {
-                theLetterScore = 3;
-            }
-            else if (theLetterScore >= 0.5 * possibleWordCount && theLetterScore < 0.75 * possibleWordCount)
-            {
-                theLetterScore = 8;
-            }
-            else if (theLetterScore >= 0.375 * possibleWordCount && theLetterScore < 0.5 * possibleWordCount)
-            {
-                theLetterScore = 7;
-            }
-            else if (theLetterScore >= 0.25 * possibleWordCount && theLetterScore < 0.375 * possibleWordCount)
-            {
-                theLetterScore = 6;
-            }
-            else if (theLetterScore > 0.01 * possibleWordCount && theLetterScore < 0.25 * possibleWordCount)
-            {
-                theLetterScore = 5;
-            }
-            else
-            {
-                theLetterScore = 0;
-            }
-
+                .Sum(letter => GetLeterScore((double)letter.Item2 / totalWordCount , possibleWordCount));
+            
             overallScore += (int) theLetterScore;
         }
 
         return overallScore;
     }
 
+    private static int GetLeterScore(double theLetterScore ,int possibleWordCount)
+    {
+        if (theLetterScore > possibleWordCount)
+        {
+            theLetterScore = 2;
+        }
+        else if (theLetterScore >= 0.75 * possibleWordCount && theLetterScore < possibleWordCount)
+        {
+            theLetterScore = 3;
+        }
+        else if (theLetterScore >= 0.5 * possibleWordCount && theLetterScore < 0.75 * possibleWordCount)
+        {
+            theLetterScore = 8;
+        }
+        else if (theLetterScore >= 0.375 * possibleWordCount && theLetterScore < 0.5 * possibleWordCount)
+        {
+            theLetterScore = 7;
+        }
+        else if (theLetterScore >= 0.25 * possibleWordCount && theLetterScore < 0.375 * possibleWordCount)
+        {
+            theLetterScore = 6;
+        }
+        else if (theLetterScore > 0.01 * possibleWordCount && theLetterScore < 0.25 * possibleWordCount)
+        {
+            theLetterScore = 5;
+        }
+        else
+        {
+            theLetterScore = 0;
+        }
+
+        return (int)theLetterScore;
+    }
 }
