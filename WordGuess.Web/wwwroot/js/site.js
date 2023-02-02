@@ -1,8 +1,7 @@
-﻿// var baseURl = "https://localhost:7231/WordleWizard";
-var baseURl = window.location.origin + "/WordleWizard";
+﻿let baseURl = window.location.origin + "/WordleWizard";
 
-var guessWordBoxIndex = 1;
-var wordGuessRowState = [
+let guessWordBoxIndex = 1;
+let wordGuessRowState = [
     {"row": 1, "state": true},
     {"row": 2, "state": false},
     {"row": 3, "state": false},
@@ -11,7 +10,7 @@ var wordGuessRowState = [
     {"row": 6, "state": false},
 ];
 
-var wordleWord = {
+let wordleWord = {
     PossibleWords: [],
     GuessWord: "",
     Correctness: [],
@@ -19,7 +18,6 @@ var wordleWord = {
     UsedWords: [],
     WordleStagePattern: ""
 }
-
 
 function Init() {
     GetStartWord();
@@ -30,7 +28,7 @@ function Init() {
 Init();
 
 function GetStartWord() {
-    var $wordList = $("#next_word_list");
+    let $wordList = $("#next_word_list");
     $wordList.empty();
     $.ajax({
         type: 'GET',
@@ -54,7 +52,7 @@ $(".dropdown-item").click(function () {
 
     if (value == 1) {
         if ($("#word_guess_row_" + rowUpdate).attr("data-rowtext")) {
-            var text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
+            let text = $("#word_guess_row_" + rowUpdate).attr("data-rowtext");
             $.each(Array.from(text), function (index, char) {
                 UpdateAlphabet(3, char);
             });
@@ -96,7 +94,7 @@ function PopulateCastWord(word) {
 }
 
 $(".word_box-choice").click(function () {
-    isDisabled = $(this).attr("disabled");
+    const isDisabled = $(this).attr("disabled");
     if (!isDisabled) {
         WordInput($(this).data("char"));
     }
@@ -269,7 +267,7 @@ function UpdateContextBoxColor(status, $ctx) {
 }
 
 function UpdateAlphabet(status, char) {
-    var $alphabet = $("#alphabet_char_" + char);
+    let $alphabet = $("#alphabet_char_" + char);
     switch (status) {
         case 1:
             $alphabet.css("background", "linear-gradient(179.72deg, #F2C94C 0.24%, #554000 181.83%)");
@@ -277,11 +275,8 @@ function UpdateAlphabet(status, char) {
         case 2:
             $alphabet.css("background", "linear-gradient(179.72deg, #219653 0.24%, #0C2719 181.83%)");
             break;
-        case 3:
-            $alphabet.attr("disabled", true);
-            $alphabet.css("background", "linear-gradient(179.72deg, #497AC4 0.24%, #000000 154.4%)");
-            break;
-        default:
+        case 3 :
+        case 0 :
             $alphabet.attr("disabled", true);
             $alphabet.css("background", "linear-gradient(179.72deg, #497AC4 0.24%, #000000 154.4%)");
             break;
@@ -291,7 +286,8 @@ function UpdateAlphabet(status, char) {
 function isAlphaKey(evt) {
     evt = (evt) ? evt : event;
     let charCode = (evt.charCode) ? evt.charCode : ((evt.keyCode) ? evt.keyCode : ((evt.which) ? evt.which : 0));
-    if (charCode > 32 && (charCode < 65 || charCode > 90) && (charCode < 97 || charCode > 122)) {
+    let isAlphaLetters = charCode > 32 && (charCode < 65 || charCode > 90) && (charCode < 97 || charCode > 122);
+    if (isAlphaLetters) {
         return false;
     }
     return true;

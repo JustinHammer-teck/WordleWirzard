@@ -66,7 +66,7 @@ public class EliminationWordService
             .FirstOrDefault("");
     }
 
-    private void GetSmashWordLevel3(IEnumerable<string> possibleWords, string[] guessWords,
+    private static void GetSmashWordLevel3(IEnumerable<string> possibleWords, string[] guessWords,
         WordScoringService wordScoreService,
         IEnumerable<string> usedWordsOnly, List<Tuple<char, int>> correctWords, List<Tuple<string, int, int>> result)
     {
@@ -74,14 +74,7 @@ public class EliminationWordService
         var filteredRepeatLetter = RemoveRepeatLetters(filtered);
         var letterFeq = wordScoreService.LetterFeq(filteredRepeatLetter);
         var overallLetterFeq = OverAllLetterFeq(letterFeq);
-
-        // result.AddRange(guessWords
-        //     .Where(fw => !usedWordsOnly.Contains(fw))
-        //     .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1))
-        //     .Select(word => new Tuple<string, int, int>(word,
-        //         GetOverallScoreSmashWord3(word, overallLetterFeq, possibleWords.Count(),
-        //             possibleWords.Sum(x => x.Length)), 0)));
-
+        
         foreach (var word in guessWords
                      .Where(fw => !usedWordsOnly.Contains(fw))
                      .Where(fw => correctWords.All(cp => fw[cp.Item2] != cp.Item1)))
@@ -116,9 +109,9 @@ public class EliminationWordService
         }
     }
 
-    private static void GetSmashWordLevel1(IEnumerable<(char, int[])> letterFeq, string[] guessWords,
-        IEnumerable<string> usedWordsOnly,
-        List<Tuple<char, int>> correctWords, List<Tuple<string, int, int>> result)
+
+    private static void GetSmashWordLevel1(IEnumerable<(char, int[])> letterFeq, IEnumerable<string> guessWords, IEnumerable<string> usedWordsOnly,
+        IReadOnlyCollection<Tuple<char, int>> correctWords, ICollection<Tuple<string, int, int>> result)
     {
         var overallLetterFeq = OverAllLetterFeq(letterFeq);
         foreach (var word in guessWords
@@ -137,10 +130,11 @@ public class EliminationWordService
     {
         var mostFeqLetterInList = new List<(char, int)>();
 
-        foreach (var word in possibleWords)
-        foreach (var letter in word.Select((c, i) => new { c, i }))
-            if (possibleWords.All(w => w[letter.i] == letter.c))
-                mostFeqLetterInList.Add((letter.c, letter.i));
+        foreach (var word in possibleWords) 
+            mostFeqLetterInList.AddRange(
+                from letter in word.Select((c, i) => new { c, i }) 
+                where possibleWords.All(w => w[letter.i] == letter.c) 
+                select (letter.c, letter.i));
 
         var result = new Dictionary<int, string>();
 
@@ -217,43 +211,17 @@ public class EliminationWordService
         return overallScore;
     }
 
-    public static int GetOverallScoreSmashWord3(string word, IEnumerable<Tuple<char, int>> overallLetterFeq,
-        int possibleWordCount, int totalWordCount)
+    private static int GetOverallScoreSmashWord3(string word, IEnumerable<Tuple<char, int>> overallLetterFeq, int possibleWordCount, int totalWordCount)
     {
         var overallScore = 0;
         var theLetterScore = 0.0;
         foreach (var c in word)
         {
-            foreach (var letter in overallLetterFeq)
-            {
-                if (c == letter.Item1)
-                {
-                    theLetterScore += (double)letter.Item2 / totalWordCount;
-                }
-            }
-
-            if (theLetterScore >= 0.75 * possibleWordCount)
-            {
-                theLetterScore = 2;
-            }
-            else if (theLetterScore >= 0.5 * possibleWordCount && theLetterScore < 0.75 * possibleWordCount)
-            {
-                theLetterScore = 5;
-            }
-            else if (theLetterScore >= 0.375 * possibleWordCount && theLetterScore < 0.5 * possibleWordCount)
-            {
-                theLetterScore = 7;
-            }
-            else if (theLetterScore >= 0.25 * possibleWordCount && theLetterScore < 0.375 * possibleWordCount)
-            {
-                theLetterScore = 6;
-            }
-            else if (theLetterScore > 0 * possibleWordCount && theLetterScore < 0.25 * possibleWordCount)
-            {
-                theLetterScore = 5;
-            }
-
-            overallScore += (int)theLetterScore;
+            theLetterScore += overallLetterFeq
+                .Where(letter => c == letter.Item1)
+                .Sum(letter => GetLeterScore((double)letter.Item2 / totalWordCount , possibleWordCount));
+            
+            overallScore += (int) theLetterScore;
         }
 
         return overallScore;
@@ -271,5 +239,39 @@ public class EliminationWordService
             }
         }
         return string.Empty;
+    }
+
+    private static int GetLeterScore(double theLetterScore ,int possibleWordCount)
+    {
+        if (theLetterScore > possibleWordCount)
+        {
+            theLetterScore = 2;
+        }
+        else if (theLetterScore >= 0.75 * possibleWordCount && theLetterScore < possibleWordCount)
+        {
+            theLetterScore = 3;
+        }
+        else if (theLetterScore >= 0.5 * possibleWordCount && theLetterScore < 0.75 * possibleWordCount)
+        {
+            theLetterScore = 8;
+        }
+        else if (theLetterScore >= 0.375 * possibleWordCount && theLetterScore < 0.5 * possibleWordCount)
+        {
+            theLetterScore = 7;
+        }
+        else if (theLetterScore >= 0.25 * possibleWordCount && theLetterScore < 0.375 * possibleWordCount)
+        {
+            theLetterScore = 6;
+        }
+        else if (theLetterScore > 0.01 * possibleWordCount && theLetterScore < 0.25 * possibleWordCount)
+        {
+            theLetterScore = 5;
+        }
+        else
+        {
+            theLetterScore = 0;
+        }
+
+        return (int)theLetterScore;
     }
 }
