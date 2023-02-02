@@ -117,7 +117,6 @@ $(".clear-row").click(function () {
     if (value == 1) {
         ClearFirstRow();
     } else if (value == 2) {
-        console.log("CLEAR ALL");
         ClearAll();
         ClearStage();
         GetStartWord();
@@ -223,7 +222,6 @@ function ClearWordCastState() {
 }
 
 function CastingNextWord(castingWord) {
-    console.log(wordleWord.Row);
     let index = 1;
     let row = 1;
     let rowIndex = 0;
@@ -277,13 +275,11 @@ function CastingNextWord(castingWord) {
     wordleWord.Row = wordleWord.Row + 1;
     wordGuessRowState[rowIndex].state = false;
     wordGuessRowState[rowIndex + 1].state = true;
-    console.log(wordGuessRowState);
 }
 
 function ProcessGuessWord() {
     $("#next_word_list").empty();
     $("#elimination_word").empty();
-    console.log(JSON.stringify(wordleWord));
     $.ajax({
         type: 'POST',
         url: baseURl + "/ProcessGuessWord",
