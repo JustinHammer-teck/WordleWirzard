@@ -41,7 +41,8 @@ public class WordleWizardController : Controller
             wordleWord.GuessWord.ToLower(),
             wordleWord.PossibleWords,
             wordleWord.Row,
-            wordleWord.UsedWords);
+            wordleWord.UsedWords,
+            wordleWord.WordleStagePattern);
         return Ok(new { data = result});
     }
 
