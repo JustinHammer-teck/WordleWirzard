@@ -42,13 +42,13 @@ public class EliminationWordService
 
         switch (possibleWords.Count())
         {
-            case >= 28:
+            case >= 13:
                 GetSmashWordLevel1(letterFeq, guessWords, usedWordsOnly, correctWords, result);
                 break;
-            case >= 7 and < 28:
-                GetSmashWordLevel2(possibleWords, guessWords, wordScoreService, usedWordsOnly, correctWords, result);
-                break;
-            case >= 3 and <= 6:
+            // case >= 7 and < 28:
+            //     GetSmashWordLevel2(possibleWords, guessWords, wordScoreService, usedWordsOnly, correctWords, result);
+            //     break;
+            case >= 3 and <= 12:
                 GetSmashWordLevel3(possibleWords, guessWords, wordScoreService, usedWordsOnly, correctWords, result);
                 break;
         }
